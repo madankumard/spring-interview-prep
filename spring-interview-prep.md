@@ -111,7 +111,7 @@ You don't need to do them separately — answering the questions in order covers
 ### 1. Spring Core (ID: Core)
 
 **Must-know**
-- [ ] ⭐ 1. What is Spring and why use it over plain Java?
+- [ ] ⭐ 1. What is Spring?
 - [ ] ⭐ 2. IoC and DI — how they enable loose coupling (with code example)
 - [ ] ⭐ 3. What is a Spring bean? What does the IoC container do?
 - [ ] ⭐ 4. BeanFactory vs ApplicationContext (one-liner)

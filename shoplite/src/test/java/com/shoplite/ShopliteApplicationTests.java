@@ -1,4 +1,4 @@
-package com.example.shoplite;
+package com.shoplite;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
