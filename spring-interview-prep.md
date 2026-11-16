@@ -116,8 +116,8 @@ You don't need to do them separately — answering the questions in order covers
 - [x] ⭐ **3.** What is a Spring bean? What does the IoC container do?
 - [x] ⭐ **4.** BeanFactory vs ApplicationContext (one-liner)
 - [x] ⭐ **5.** Full bean lifecycle walkthrough
-- [ ] ⭐ **6.** What are the different bean scopes in Spring?
-- [ ] ⭐ **7.** Singleton vs prototype — the differences
+- [x] ⭐ **6.** What are the different bean scopes in Spring?
+- [x] ⭐ **7.** Singleton vs prototype — the differences
 - [ ] ⭐ **8.** Are singleton beans thread-safe? How to make them safe?
 - [ ] ⭐ **9.** Constructor vs setter vs field injection — why constructor is preferred
 - [ ] **10.** Why is @Autowired optional on a single constructor?
