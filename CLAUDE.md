@@ -53,15 +53,21 @@ Create the file if it doesn't exist. Use this format:
 
 **Follow-ups:**
 
-**Q: ...?**
-- answer point
+### Q: ...?
 - answer point
 
-**Q: ...?**
 - answer point
 
 ---
+
+### Q: ...?
+- answer point
+
 ```
+
+Dividers: a single `---` line between every two follow-up questions (blank line before
+and after it). Put NO `---` between main questions: the `## <ID>` heading is the divider
+(my IDE preview draws a thick full-width line above every `##` heading via custom CSS).
 
 Notes are for later revision: only real content. Full code, file paths, steps and
 Verify go in the chat, not in the notes file. The Answer / Key points / Follow-ups
@@ -83,3 +89,5 @@ text goes in the notes file, not in the chat.
   not a one-line fragment.
 - Bold the important words and key terms inside sentences so the notes are easy
   to scan. Don't bold whole sentences.
+- In notes files, leave a blank line between every two bullet points so the
+  preview shows space between them.

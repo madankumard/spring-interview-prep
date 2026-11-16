@@ -113,8 +113,8 @@ You don't need to do them separately — answering the questions in order covers
 **Must-know**
 - [x] ⭐ **1.** What is Spring?
 - [x] ⭐ **2.** IoC and DI — how they enable loose coupling (with code example)
-- [ ] ⭐ **3.** What is a Spring bean? What does the IoC container do?
-- [ ] ⭐ **4.** BeanFactory vs ApplicationContext (one-liner)
+- [x] ⭐ **3.** What is a Spring bean? What does the IoC container do?
+- [x] ⭐ **4.** BeanFactory vs ApplicationContext (one-liner)
 - [ ] ⭐ **5.** Full bean lifecycle walkthrough
 - [ ] ⭐ **6.** Bean scopes — singleton vs prototype in depth
 - [ ] ⭐ **7.** Are singleton beans thread-safe? How to make them safe?
