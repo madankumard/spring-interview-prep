@@ -328,3 +328,126 @@ var context = new AnnotationConfigApplicationContext(LoudBean.class);
 - Yes. Contexts can form a **parent-child hierarchy**, where a child can see the parent's beans but the parent cannot see the child's.
 
 - Classic Spring MVC used a **root context** for services and repositories plus a **child context per `DispatcherServlet`** for controllers. A typical **Spring Boot app has a single context**, so this mostly comes up with legacy apps and with Spring Cloud's bootstrap or named child contexts.
+
+## Core 5 — Full bean lifecycle walkthrough
+
+**Answer:**
+- The bean lifecycle is the sequence of steps the container takes a bean through, **from creation to destruction**. I usually describe it in four phases: **instantiate, inject, initialize, destroy**.
+
+- First the container **instantiates** the bean by calling its constructor, which is also where **constructor injection** happens. Then it **populates properties**, meaning any setter or field injection.
+
+- Next come the **Aware callbacks**, such as `BeanNameAware` and `ApplicationContextAware`, where Spring hands the bean references to container infrastructure if it asks for them.
+
+- Then the bean is **initialized**. `BeanPostProcessor`s run their **before-initialization** step, then the init callbacks run in the order **`@PostConstruct`**, **`InitializingBean.afterPropertiesSet()`**, and a custom **init method**. After that, `BeanPostProcessor`s run their **after-initialization** step, which is where **AOP proxies** are created.
+
+- Now the bean is **ready and in use** for the life of the application. On shutdown the container calls the destroy callbacks in the order **`@PreDestroy`**, **`DisposableBean.destroy()`**, and a custom **destroy method**.
+
+**Key points:**
+- **The full order:** It helps to remember it as one list.
+
+```
+1. Constructor                                   (instantiation + constructor injection)
+2. Setter / field injection                      (populate properties)
+3. Aware callbacks                               (BeanNameAware, ApplicationContextAware, ...)
+4. BeanPostProcessor.postProcessBeforeInitialization
+5. @PostConstruct
+6. InitializingBean.afterPropertiesSet()
+7. Custom init method                            (@Bean(initMethod = "..."))
+8. BeanPostProcessor.postProcessAfterInitialization   (AOP proxies created here)
+   ---- bean is ready and in use ----
+9. @PreDestroy
+10. DisposableBean.destroy()
+11. Custom destroy method                        (@Bean(destroyMethod = "..."))
+```
+
+- **Before any bean is created:** The container first loads all **bean definitions**, and **`BeanFactoryPostProcessor`s** get a chance to modify them. This works on the recipes, not on bean instances, and it is how `${...}` property placeholders get resolved.
+
+- **Initialization callbacks:** `@PostConstruct` is the place for logic that needs the bean's **dependencies to be injected already**, such as validating configuration or warming a cache. It is the **preferred** option because it is a standard Jakarta annotation and doesn't tie the class to Spring interfaces.
+
+```java
+@Component
+public class PriceCache {
+    private final ProductRepository repository;
+
+    public PriceCache(ProductRepository repository) {
+        this.repository = repository;
+    }
+
+    @PostConstruct
+    void load() { ... }        // dependencies are injected, safe to use them
+
+    @PreDestroy
+    void clear() { ... }       // release resources on shutdown
+}
+```
+
+- **`BeanPostProcessor`:** A `BeanPostProcessor` is a hook that sees **every bean** just before and just after its initialization, and it may **return a different object** than it received. That is exactly how Spring implements proxies: the after-initialization step can return a **proxy wrapping the original bean**.
+
+- **Proxies come last:** Because the proxy is created in the **after-initialization** step, code inside `@PostConstruct` runs on the **raw bean**, not the proxy. So proxy-based features such as `@Transactional` **do not apply** to work done inside `@PostConstruct`.
+
+- **Destruction:** Destroy callbacks run when the **context is closed**, which in Spring Boot happens through a **JVM shutdown hook**. Beans are destroyed in the **reverse order of creation**, so a bean is destroyed before the beans it depends on.
+
+- **Third-party classes:** For a class I can't annotate, I declare the callbacks on the `@Bean` method instead.
+
+```java
+@Bean(initMethod = "start", destroyMethod = "stop")
+ConnectionPool connectionPool() {
+    return new ConnectionPool();
+}
+```
+
+- **`jakarta`, not `javax`:** Since Spring 6 the annotations are `jakarta.annotation.PostConstruct` and `jakarta.annotation.PreDestroy`. The old `javax.annotation` versions are **no longer recognised**.
+
+**Follow-ups:**
+
+### Q: Why use @PostConstruct instead of putting the logic in the constructor?
+- With **field or setter injection**, the dependencies are **not injected yet** when the constructor runs, so using them there gives a `NullPointerException`. `@PostConstruct` runs **after all injection is complete**.
+
+- Even with constructor injection, it's good practice to keep constructors **light and free of side effects**, such as calling a database or a remote service. That keeps the class easy to create in unit tests, where I can simply not call the init method.
+
+- `@PostConstruct` also runs after the **Aware callbacks**, so the bean is fully set up by the container at that point.
+
+---
+
+### Q: @PostConstruct vs InitializingBean vs initMethod, which one and in what order?
+- They all do the same job and run in this fixed order: **`@PostConstruct`**, then **`afterPropertiesSet()`**, then the custom **init method**.
+
+- **`@PostConstruct` is preferred** for my own classes because it's a standard annotation and keeps the class independent of Spring.
+
+- **`InitializingBean`** is a Spring interface, so implementing it **couples the class to Spring**. It's mostly seen inside framework code.
+
+- **`initMethod`** on `@Bean` is for **third-party classes** whose source I can't change. The same three options exist for destruction: `@PreDestroy`, `DisposableBean` and `destroyMethod`.
+
+---
+
+### Q: At what point in the lifecycle are AOP proxies created?
+- In the **after-initialization** step of a `BeanPostProcessor`, which is the last step before the bean is ready. The post-processor returns a **proxy that wraps the original bean**, and that proxy is what gets injected into other beans.
+
+- The practical consequence is that inside the constructor and `@PostConstruct` I'm working with the **raw object**. Calling a `@Transactional` or `@Async` method from `@PostConstruct` runs it **without** the transaction or async behaviour.
+
+- If I need startup logic that goes through the proxy, I run it **after the context is ready**, for example in an `ApplicationRunner` or an `ApplicationReadyEvent` listener.
+
+---
+
+### Q: Are destroy callbacks called for prototype beans?
+- **No.** The container creates a prototype bean, initializes it and hands it over, but it does **not keep a reference** to it afterwards.
+
+- So `@PostConstruct` runs for a prototype bean, but **`@PreDestroy` never does**. If a prototype holds resources such as connections, the **code that requested it** is responsible for cleaning up.
+
+---
+
+### Q: How is bean destruction triggered in a Spring Boot app?
+- Spring Boot registers a **JVM shutdown hook** that closes the `ApplicationContext`. It fires on a normal exit or a **SIGTERM**, which is what Kubernetes and `Ctrl+C` send.
+
+- Closing the context runs the **destroy callbacks** in reverse order of creation. With graceful shutdown enabled, the web server first **stops accepting new requests** and lets in-flight ones finish.
+
+- A **forced kill** such as `kill -9` or a power loss skips the shutdown hook, so `@PreDestroy` is **not guaranteed** to run. I shouldn't rely on it for anything critical like saving important data.
+
+---
+
+### Q: What runs after all beans have been created?
+- After every singleton is created, Spring calls **`SmartInitializingSingleton.afterSingletonsInstantiated()`** on beans that implement it, and then publishes **`ContextRefreshedEvent`**.
+
+- Spring Boot then runs the **`ApplicationRunner`** and **`CommandLineRunner`** beans and finally publishes **`ApplicationReadyEvent`**, which signals that the application is ready to serve requests.
+
+- This matters because `@PostConstruct` runs while **other beans may still be under construction**. Startup logic that needs the **whole application ready** belongs in a runner or an `ApplicationReadyEvent` listener instead.
