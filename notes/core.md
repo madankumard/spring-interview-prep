@@ -136,7 +136,7 @@ assertThat(sent).containsExactly("bob@shoplite.com:Order placed for Mouse");
 ---
 
 ### Q: What types of DI does Spring support?
-- **Constructor injection:** dependencies are declared as **constructor parameters**. This is the recommended style because fields can be **final**, required dependencies are **explicit**, and the class can be created in a test with plain `new` (see Core 8).
+- **Constructor injection:** dependencies are declared as **constructor parameters**. This is the recommended style because fields can be **final**, required dependencies are **explicit**, and the class can be created in a test with plain `new` (see Core 9).
 
 - **Setter injection:** Spring calls a **setter method** annotated with `@Autowired` after creating the object. It suits **optional** dependencies or ones that may be changed later, but the object can exist for a moment without them.
 
@@ -147,7 +147,7 @@ assertThat(sent).containsExactly("bob@shoplite.com:Order placed for Mouse");
 ### Q: What if two beans implement the same interface?
 - Spring injects **by type**, and with two candidates it can't decide which one to use. Startup fails with `NoUniqueBeanDefinitionException`.
 
-- **`@Primary`** on one implementation marks it as the **default** whenever there is a choice. **`@Qualifier("beanName")`** at the injection point picks **one specific bean by name** and overrides `@Primary` (see Core 15).
+- **`@Primary`** on one implementation marks it as the **default** whenever there is a choice. **`@Qualifier("beanName")`** at the injection point picks **one specific bean by name** and overrides `@Primary` (see Core 16).
 
 - If I actually want **all** implementations, I can inject a `List<NotificationService>` and Spring passes every matching bean.
 
@@ -451,3 +451,159 @@ ConnectionPool connectionPool() {
 - Spring Boot then runs the **`ApplicationRunner`** and **`CommandLineRunner`** beans and finally publishes **`ApplicationReadyEvent`**, which signals that the application is ready to serve requests.
 
 - This matters because `@PostConstruct` runs while **other beans may still be under construction**. Startup logic that needs the **whole application ready** belongs in a runner or an `ApplicationReadyEvent` listener instead.
+
+## Core 6 — What are the different bean scopes in Spring?
+
+**Answer:**
+- A bean's scope defines **how many instances** of it the container creates and **how long each one lives**. Spring has **six built-in scopes**: two core scopes that work in any application, and four **web scopes** that need a web application.
+
+- **Singleton** is the default and gives **one instance per `ApplicationContext`**, shared by the whole application. It's used for stateless beans such as services, repositories and controllers.
+
+- **Prototype** gives a **new instance every time** the bean is requested from the container. It's used for stateful, short-lived objects, and Spring does not run destroy callbacks for it.
+
+- **Request** scope gives **one instance per HTTP request**, and the instance is discarded when the request ends. It suits per-request data, for example a holder for the current request's correlation ID or the details of the logged-in user.
+
+- **Session** scope gives **one instance per HTTP session**, so the same user gets the same instance across several requests until the session expires. The classic example is a **shopping cart** or user preferences in a server-side session application.
+
+- **Application** scope gives **one instance per `ServletContext`**, which means one for the whole web application. **WebSocket** scope gives **one instance per WebSocket session**, living as long as that connection stays open.
+
+**Key points:**
+- **All six at a glance:** The scope name, how long an instance lives, and how to declare it.
+
+| Scope | One instance per | Annotation |
+|---|---|---|
+| **singleton** (default) | `ApplicationContext` | none needed |
+| **prototype** | request to the container (injection point or `getBean()`) | `@Scope("prototype")` |
+| **request** | HTTP request | `@RequestScope` |
+| **session** | HTTP session (one user's session) | `@SessionScope` |
+| **application** | `ServletContext` (the whole web app) | `@ApplicationScope` |
+| **websocket** | WebSocket session | `@Scope("websocket")` |
+
+- **Declaring a scope:** I put `@Scope` or one of the shortcut annotations on the class, or on the `@Bean` method. Singleton needs nothing because it's the default.
+
+```java
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)   // same as @Scope("prototype")
+public class ShoppingCart { ... }
+
+@Component
+@RequestScope                                      // one instance per HTTP request
+public class RequestContext { ... }
+```
+
+- **Web scopes need a web context:** Request, session, application and websocket scopes only exist in a **web-aware `ApplicationContext`**. Using them in a non-web application fails with an error saying the scope is not registered.
+
+- **Scoped proxies:** A request-scoped bean can't be injected directly into a singleton, because the singleton is created at startup when **no request exists**. Spring injects a **proxy** instead, and on each call the proxy **delegates to the instance for the current request**. `@RequestScope` and `@SessionScope` enable this proxy by default.
+
+- **In a stateless REST API:** I mostly use **singletons only**. Session scope is uncommon there because state is kept in the token or the database, not in the server's memory.
+
+- **Custom scopes:** Spring lets me register my own scopes through the `Scope` interface. The best-known example is Spring Cloud's **`@RefreshScope`**, which recreates beans when configuration changes at runtime.
+
+**Follow-ups:**
+
+### Q: How does a request-scoped or session-scoped bean get injected into a singleton?
+- Through a **scoped proxy**. At startup Spring injects a **proxy object** into the singleton instead of a real instance, because no request or session exists yet.
+
+- Each time a method is called on the proxy, it **looks up the real bean for the current request or session** and delegates the call to it. So one singleton can safely serve many concurrent requests, each one seeing **its own** scoped bean.
+
+- `@RequestScope` and `@SessionScope` set `proxyMode = ScopedProxyMode.TARGET_CLASS` by default, so this works without extra configuration. Calling such a bean **outside a request**, for example from a background thread, fails because there is no active scope.
+
+---
+
+### Q: What is the difference between application scope and singleton?
+- They are very close, because both give effectively **one instance for the application**. The difference is what the instance is tied to.
+
+- A **singleton** is one instance per **`ApplicationContext`**. An **application-scoped** bean is one instance per **`ServletContext`**, and it is also exposed as a `ServletContext` attribute.
+
+- It only matters when one web application has **several application contexts** sharing a single `ServletContext`. In a normal Spring Boot app there is one of each, so I just use singleton.
+
+---
+
+### Q: Which scope should you choose for a bean?
+- **Singleton by default**, and it fits almost everything, as long as the bean is **stateless**. One shared instance is cheap and there is nothing to clean up.
+
+- I pick a narrower scope only when the bean must hold **state that belongs to something specific**: **request** for data of one HTTP request, **session** for data of one user's session, and **prototype** when each user of the bean needs its own fresh object.
+
+- If the object needs **no injection and no Spring features**, it often shouldn't be a bean at all. Creating it with `new` is simpler.
+
+## Core 7 — Singleton vs prototype — the differences
+
+**Answer:**
+- Singleton and prototype are the two **core bean scopes**, and they differ in **how many instances** exist, **when** they are created, and **how much of the lifecycle** Spring manages.
+
+- **Singleton is the default.** The container creates **exactly one instance per `ApplicationContext`**, normally **eagerly at startup**, and every class that injects the bean shares that same instance.
+
+- With **prototype** scope the container creates a **new instance every time the bean is requested**, meaning at every injection point and on every `getBean()` call. Prototypes are created **lazily**, only when something asks for them.
+
+- The lifecycle is also different. Spring manages a singleton's **complete lifecycle** including destruction, but for a prototype it only creates, injects and initializes the object and then **hands it over**, so **`@PreDestroy` is never called**.
+
+- In practice almost every bean is a **stateless singleton**, such as services, repositories and controllers. Prototype is for **stateful, short-lived objects** where each user of the bean needs its own copy.
+
+**Key points:**
+- **Side by side:** The differences that interviewers look for.
+
+| | Singleton | Prototype |
+|---|---|---|
+| Instances | One per container | New one per request to the container |
+| Created | Eagerly at startup | Lazily, when requested |
+| Init callbacks (`@PostConstruct`) | Yes | Yes |
+| Destroy callbacks (`@PreDestroy`) | Yes | **No** |
+| Typical use | Stateless services | Stateful, short-lived objects |
+
+- **Declaring them:** Singleton needs nothing because it's the default. For prototype I add `@Scope` on the class or on the `@Bean` method.
+
+```java
+@Service
+public class OrderService { ... }                       // singleton by default
+
+@Component
+@Scope(ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class ShoppingCart { ... }
+
+context.getBean(OrderService.class) == context.getBean(OrderService.class);   // true
+context.getBean(ShoppingCart.class) == context.getBean(ShoppingCart.class);   // false
+```
+
+- **Singleton means shared state:** Because one instance serves **all threads and all requests**, a singleton must not keep per-request or per-user data in its fields. Holding mutable state in a singleton is the classic cause of **thread-safety bugs** (see Core 8).
+
+- **Prototype inside a singleton:** This is the main pitfall. A singleton is created **once**, so its dependencies are injected **once**, and a prototype injected into it becomes **effectively a singleton**. The fix is to ask the container for a fresh instance each time, using `ObjectProvider`, `@Lookup` or a scoped proxy (see Core 21).
+
+```java
+@Service
+public class CheckoutService {
+    private final ShoppingCart cart;            // prototype, but injected only once
+
+    public CheckoutService(ShoppingCart cart) {
+        this.cart = cart;                       // every caller now shares this one cart
+    }
+}
+```
+
+- **Who cleans up a prototype:** After handing a prototype over, the container **keeps no reference** to it. If it holds resources such as connections or files, the **code that requested it** must release them.
+
+**Follow-ups:**
+
+### Q: Is a Spring singleton the same as the GoF Singleton pattern?
+- **No.** The GoF Singleton guarantees **one instance per classloader** and the class enforces it itself, with a **private constructor** and a static `getInstance()` method.
+
+- A Spring singleton is **one instance per bean definition per container**. The class is a normal class with a public constructor, and it's the **container** that makes sure only one is created.
+
+- So I can have **two singleton beans of the same class** if I define two `@Bean` methods, and two application contexts would each have their own instance. Spring's version is also much **easier to test**, because nothing stops me from creating the class with `new` in a unit test.
+
+---
+
+### Q: What happens when you inject a prototype bean into a singleton?
+- The prototype is created **once**, at the moment the singleton is created, and that single instance stays in the singleton's field **forever**. So the prototype behaves like a singleton, which is almost never what was intended.
+
+- It happens because **injection occurs at creation time**, not on every method call. The container has no reason to revisit the singleton later.
+
+- The fix is to **look up a new instance when I need one**. I inject an **`ObjectProvider<ShoppingCart>`** and call `getObject()`, or use a **`@Lookup`** method, or put a **scoped proxy** on the prototype (see Core 21).
+
+---
+
+### Q: When would you actually use prototype scope?
+- When a bean holds **state that must not be shared**, and each use needs a **fresh instance**. Examples are a non-thread-safe helper, a builder or command object for a single operation, or a per-task processor.
+
+- Honestly it is **rare** in typical applications. If the object doesn't need **injected dependencies or Spring features**, it's simpler to create it with `new` or through a small factory.
+
+- Prototype scope is worth it when the object is stateful **and** needs things from the container, such as injected services or configuration.
