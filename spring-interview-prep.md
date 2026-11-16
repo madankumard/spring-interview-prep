@@ -13,7 +13,7 @@
 **Suggested order:** Core → Boot → REST → JPA → AOP → Security → Test → MS → Cloud.
 This follows the project phases in Part 1, so the code builds up naturally.
 
-⭐ = high priority (do these first if short on time; see Part 3).
+⭐ = high priority (do these first if short on time).
 
 ---
 
@@ -28,7 +28,7 @@ You don't need to do them separately — answering the questions in order covers
 - [ ] Java 25, latest Spring Boot via start.spring.io (Web, JPA, Validation, PostgreSQL, Actuator, Testcontainers)
 - [ ] Docker Desktop running (needed for Postgres + Testcontainers)
 
-### Phase 1 — Spring Core playground (1–2 days) → Core Q1–26
+### Phase 1 — Spring Core playground (1–2 days) → Core Q1–24
 - [ ] Plain module (no web): `NotificationService` with Email/SMS implementations → DI, @Primary, @Qualifier
 - [ ] Break it on purpose: trigger NoUniqueBeanDefinitionException and NoSuchBeanDefinitionException, then fix
 - [ ] Log every lifecycle callback (constructor, @PostConstruct, BeanPostProcessor, @PreDestroy)
@@ -111,321 +111,317 @@ You don't need to do them separately — answering the questions in order covers
 ### 1. Spring Core (ID: Core)
 
 **Must-know**
-- [ ] ⭐ 1. What is Spring?
-- [ ] ⭐ 2. IoC and DI — how they enable loose coupling (with code example)
-- [ ] ⭐ 3. What is a Spring bean? What does the IoC container do?
-- [ ] ⭐ 4. BeanFactory vs ApplicationContext (one-liner)
-- [ ] ⭐ 5. Full bean lifecycle walkthrough
-- [ ] ⭐ 6. Bean scopes — singleton vs prototype in depth
-- [ ] ⭐ 7. Are singleton beans thread-safe? How to make them safe?
-- [ ] ⭐ 8. Constructor vs setter vs field injection — why constructor is preferred
-- [ ] 9. Why is @Autowired optional on a single constructor?
+- [x] ⭐ **1.** What is Spring?
+- [x] ⭐ **2.** IoC and DI — how they enable loose coupling (with code example)
+- [ ] ⭐ **3.** What is a Spring bean? What does the IoC container do?
+- [ ] ⭐ **4.** BeanFactory vs ApplicationContext (one-liner)
+- [ ] ⭐ **5.** Full bean lifecycle walkthrough
+- [ ] ⭐ **6.** Bean scopes — singleton vs prototype in depth
+- [ ] ⭐ **7.** Are singleton beans thread-safe? How to make them safe?
+- [ ] ⭐ **8.** Constructor vs setter vs field injection — why constructor is preferred
+- [ ] **9.** Why is @Autowired optional on a single constructor?
 
 **Configuration & annotations**
-- [ ] 10. How does @ComponentScan find beans?
-- [ ] ⭐ 11. @Component vs @Service vs @Repository vs @Controller
-- [ ] ⭐ 12. @Bean vs @Component
-- [ ] 13. @Configuration vs @Component with @Bean methods (proxyBeanMethods)
-- [ ] 14. How does @Autowired resolve dependencies (type → qualifier → name)?
-- [ ] ⭐ 15. NoUniqueBeanDefinitionException — @Primary vs @Qualifier
-- [ ] 16. NoSuchBeanDefinitionException — causes and fixes
-- [ ] 17. @Value vs @ConfigurationProperties (incl. records)
-- [ ] 18. @Profile and @Conditional (foundation of auto-configuration)
-- [ ] 19. @Lazy — what and when
+- [ ] **10.** How does @ComponentScan find beans?
+- [ ] ⭐ **11.** @Component vs @Service vs @Repository vs @Controller
+- [ ] ⭐ **12.** @Bean vs @Component
+- [ ] **13.** @Configuration vs @Component with @Bean methods (proxyBeanMethods)
+- [ ] **14.** How does @Autowired resolve dependencies (type → qualifier → name)?
+- [ ] ⭐ **15.** NoUniqueBeanDefinitionException — @Primary vs @Qualifier
+- [ ] **16.** NoSuchBeanDefinitionException — causes and fixes
+- [ ] **17.** @Value vs @ConfigurationProperties (incl. records)
+- [ ] **18.** @Profile and @Conditional (foundation of auto-configuration)
+- [ ] **19.** @Lazy — what and when
 
 **Advanced**
-- [ ] 20. Prototype inside singleton (ObjectProvider, @Lookup)
-- [ ] ⭐ 21. Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
-- [ ] 22. BeanPostProcessor vs BeanFactoryPostProcessor
-- [ ] 23. Spring AOP proxies — JDK dynamic proxy vs CGLIB
-- [ ] ⭐ 24. Why self-invocation bypasses @Transactional/@Async, and fixes
-- [ ] 25. ApplicationEvent, @EventListener, @TransactionalEventListener
-- [ ] 26. Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
+- [ ] **20.** Prototype inside singleton (ObjectProvider, @Lookup)
+- [ ] ⭐ **21.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
+- [ ] **22.** BeanPostProcessor vs BeanFactoryPostProcessor
+- [ ] **23.** ApplicationEvent, @EventListener, @TransactionalEventListener
+- [ ] **24.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
 
-**Modern (Spring 6+/7)**
-- [ ] 27. Spring 6 / Boot 3 changes — Jakarta namespace, Java 17 baseline
-- [ ] 28. AOT / GraalVM native images and their constraints
-- [ ] 29. Virtual threads in Spring Boot
-- [ ] 30. RestClient and HTTP interface clients vs RestTemplate/WebClient
+---
 
 ### 2. Spring Boot (ID: Boot)
 
 **Must-know**
-- [ ] 1. What is Spring Boot and how is it different from plain Spring?
-- [ ] ⭐ 2. What happens step by step in SpringApplication.run()?
-- [ ] ⭐ 3. What @SpringBootApplication combines and what each part does
-- [ ] 4. Starters and dependency version management (BOM / parent POM)
-- [ ] ⭐ 5. How auto-configuration works (AutoConfiguration.imports, @Conditional*)
-- [ ] ⭐ 6. Overriding auto-configured beans (@ConditionalOnMissingBean) and excluding auto-configs
-- [ ] 7. Embedded servers — swap Tomcat for Jetty/Undertow, change port, disable web server
-- [ ] 8. @RestController vs @Controller
+- [ ] **1.** What is Spring Boot and how is it different from plain Spring?
+- [ ] ⭐ **2.** What happens step by step in SpringApplication.run()?
+- [ ] ⭐ **3.** What @SpringBootApplication combines and what each part does
+- [ ] **4.** Starters and dependency version management (BOM / parent POM)
+- [ ] ⭐ **5.** How auto-configuration works (AutoConfiguration.imports, @Conditional*)
+- [ ] ⭐ **6.** Overriding auto-configured beans (@ConditionalOnMissingBean) and excluding auto-configs
+- [ ] **7.** Embedded servers — swap Tomcat for Jetty/Undertow, change port, disable web server
+- [ ] **8.** @RestController vs @Controller
 
 **Configuration**
-- [ ] ⭐ 9. Externalized config precedence (properties, YAML, env vars, CLI args)
-- [ ] 10. @ConfigurationProperties — binding, @Validated, records
-- [ ] 11. Profiles — activation, profile-specific files, @Profile, profile groups
-- [ ] 12. spring.config.import and loading external config/secrets
+- [ ] ⭐ **9.** Externalized config precedence (properties, YAML, env vars, CLI args)
+- [ ] **10.** @ConfigurationProperties — binding, @Validated, records
+- [ ] **11.** Profiles — activation, profile-specific files, @Profile, profile groups
+- [ ] **12.** spring.config.import and loading external config/secrets
 
 **Web & data**
-- [ ] ⭐ 13. Global exception handling (@ControllerAdvice) + ProblemDetail (RFC 9457)
-- [ ] 14. Request validation with @Valid / Bean Validation
-- [ ] 15. How Boot configures DataSource + JPA (Hibernate default, HikariCP)
-- [ ] 16. spring.jpa.open-in-view — why Boot warns about it
-- [ ] 17. @Transactional behaviour in Boot apps
+- [ ] ⭐ **13.** Global exception handling (@ControllerAdvice) + ProblemDetail (RFC 9457)
+- [ ] **14.** Request validation with @Valid / Bean Validation
+- [ ] **15.** How Boot configures DataSource + JPA (Hibernate default, HikariCP)
+- [ ] **16.** spring.jpa.open-in-view — why Boot warns about it
+- [ ] **17.** @Transactional behaviour in Boot apps
 
 **Testing**
-- [ ] ⭐ 18. @SpringBootTest vs slices (@WebMvcTest, @DataJpaTest)
-- [ ] 19. @MockitoBean vs @MockBean (deprecated)
-- [ ] 20. Testcontainers with @ServiceConnection
+- [ ] ⭐ **18.** @SpringBootTest vs slices (@WebMvcTest, @DataJpaTest)
+- [ ] **19.** @MockitoBean vs @MockBean (deprecated)
+- [ ] **20.** Testcontainers with @ServiceConnection
 
 **Production readiness**
-- [ ] ⭐ 21. Actuator — key endpoints, exposing, securing
-- [ ] ⭐ 22. Liveness and readiness probes for Kubernetes
-- [ ] ⭐ 23. Observability with Micrometer — metrics, tracing, trace IDs in logs
-- [ ] 24. Logging — runtime level changes, log groups, Logback
-- [ ] 25. Graceful shutdown
-- [ ] 26. CommandLineRunner vs ApplicationRunner
+- [ ] ⭐ **21.** Actuator — key endpoints, exposing, securing
+- [ ] ⭐ **22.** Liveness and readiness probes for Kubernetes
+- [ ] ⭐ **23.** Observability with Micrometer — metrics, tracing, trace IDs in logs
+- [ ] **24.** Logging — runtime level changes, log groups, Logback
+- [ ] **25.** Graceful shutdown
+- [ ] **26.** CommandLineRunner vs ApplicationRunner
 
 **Modern Boot (3+/4)**
-- [ ] 27. Boot 2 → 3 migration (Jakarta, Java 17, breaking changes)
-- [ ] 28. GraalVM native images and AOT
-- [ ] 29. Virtual threads
-- [ ] 30. Executable JAR internals, layered jars, Buildpacks
-- [ ] 31. Docker Compose support in development
-- [ ] 32. DevTools — what it does, why it's off in production
+- [ ] **27.** Boot 2 → 3 migration (Jakarta, Java 17, breaking changes)
+- [ ] **28.** GraalVM native images and AOT
+- [ ] **29.** Virtual threads
+- [ ] **30.** Executable JAR internals, layered jars, Buildpacks
+- [ ] **31.** Docker Compose support in development
+- [ ] **32.** DevTools — what it does, why it's off in production
+
+---
 
 ### 3. Spring REST, incl. Spring MVC (ID: REST)
 
 **REST fundamentals**
-- [ ] 1. What is REST? Constraints and resources
-- [ ] ⭐ 2. Safe vs idempotent methods; why idempotency matters
-- [ ] ⭐ 3. PUT vs PATCH vs POST
-- [ ] 4. Making POST idempotent (idempotency keys)
-- [ ] ⭐ 5. Key status codes (200, 201+Location, 204, 400, 401 vs 403, 404, 409, 422, 500)
-- [ ] 6. URL design best practices
+- [ ] **1.** What is REST? Constraints and resources
+- [ ] ⭐ **2.** Safe vs idempotent methods; why idempotency matters
+- [ ] ⭐ **3.** PUT vs PATCH vs POST
+- [ ] **4.** Making POST idempotent (idempotency keys)
+- [ ] ⭐ **5.** Key status codes (200, 201+Location, 204, 400, 401 vs 403, 404, 409, 422, 500)
+- [ ] **6.** URL design best practices
 
 **Spring MVC core**
-- [ ] 7. @RestController vs @Controller + @ResponseBody
-- [ ] 8. @RequestMapping and shortcuts; consumes/produces
-- [ ] ⭐ 9. @PathVariable vs @RequestParam vs @RequestBody vs @RequestHeader
-- [ ] 10. ResponseEntity vs @ResponseStatus
-- [ ] ⭐ 11. HttpMessageConverter and content negotiation
-- [ ] 12. Request flow through DispatcherServlet (HandlerMapping → HandlerAdapter → converter)
-- [ ] 13. Why DTOs instead of exposing entities
-- [ ] 14. Filter vs HandlerInterceptor vs AOP
-- [ ] 15. Spring MVC vs WebFlux — and how virtual threads change the choice
+- [ ] **7.** @RestController vs @Controller + @ResponseBody
+- [ ] **8.** @RequestMapping and shortcuts; consumes/produces
+- [ ] ⭐ **9.** @PathVariable vs @RequestParam vs @RequestBody vs @RequestHeader
+- [ ] **10.** ResponseEntity vs @ResponseStatus
+- [ ] ⭐ **11.** HttpMessageConverter and content negotiation
+- [ ] **12.** Request flow through DispatcherServlet (HandlerMapping → HandlerAdapter → converter)
+- [ ] **13.** Why DTOs instead of exposing entities
+- [ ] **14.** Filter vs HandlerInterceptor vs AOP
+- [ ] **15.** Spring MVC vs WebFlux — and how virtual threads change the choice
 
 **Errors & validation**
-- [ ] ⭐ 16. @RestControllerAdvice + @ExceptionHandler
-- [ ] 17. ProblemDetail (RFC 9457)
-- [ ] ⭐ 18. @Valid / @Validated, custom validators, MethodArgumentNotValidException
+- [ ] ⭐ **16.** @RestControllerAdvice + @ExceptionHandler
+- [ ] **17.** ProblemDetail (RFC 9457)
+- [ ] ⭐ **18.** @Valid / @Validated, custom validators, MethodArgumentNotValidException
 
 **API design**
-- [ ] 19. API versioning strategies; Spring Framework 7 built-in versioning
-- [ ] 20. Pagination and sorting (Pageable)
-- [ ] 21. Caching with ETag / Cache-Control
-- [ ] 22. OpenAPI / Swagger (springdoc)
-- [ ] 23. File upload/download (multipart)
+- [ ] **19.** API versioning strategies; Spring Framework 7 built-in versioning
+- [ ] **20.** Pagination and sorting (Pageable)
+- [ ] **21.** Caching with ETag / Cache-Control
+- [ ] **22.** OpenAPI / Swagger (springdoc)
+- [ ] **23.** File upload/download (multipart)
 
 **Security**
-- [ ] ⭐ 24. Securing REST APIs — stateless JWT via OAuth2 Resource Server
-- [ ] 25. CORS
-- [ ] 26. Rate limiting and API gateway basics
+- [ ] ⭐ **24.** Securing REST APIs — stateless JWT via OAuth2 Resource Server
+- [ ] **25.** CORS
+- [ ] **26.** Rate limiting and API gateway basics
 
 **HTTP clients**
-- [ ] ⭐ 27. RestTemplate vs WebClient vs RestClient — which to use today
-- [ ] 28. HTTP interface clients (@HttpExchange)
-- [ ] 29. Timeouts, retries, circuit breakers for outbound calls
+- [ ] ⭐ **27.** RestTemplate vs WebClient vs RestClient — which to use today
+- [ ] **28.** HTTP interface clients (@HttpExchange)
+- [ ] **29.** Timeouts, retries, circuit breakers for outbound calls
 
 **Testing**
-- [ ] 30. @WebMvcTest with MockMvc / MockMvcTester
-- [ ] 31. Testing clients with MockRestServiceServer / WireMock
+- [ ] **30.** @WebMvcTest with MockMvc / MockMvcTester
+- [ ] **31.** Testing clients with MockRestServiceServer / WireMock
+
+---
 
 ### 4. Spring Data JPA (ID: JPA)
 
 **Fundamentals**
-- [ ] 1. JDBC vs JPA vs Hibernate vs Spring Data JPA
-- [ ] ⭐ 2. Entity states (transient, managed, detached, removed)
-- [ ] ⭐ 3. Persistence context and dirty checking
-- [ ] 4. persist() vs merge()
-- [ ] 5. Flush timing and flush modes
+- [ ] **1.** JDBC vs JPA vs Hibernate vs Spring Data JPA
+- [ ] ⭐ **2.** Entity states (transient, managed, detached, removed)
+- [ ] ⭐ **3.** Persistence context and dirty checking
+- [ ] **4.** persist() vs merge()
+- [ ] **5.** Flush timing and flush modes
 
 **Mapping**
-- [ ] 6. ID generation strategies (IDENTITY, SEQUENCE, UUID) and batching impact
-- [ ] 7. Owning side, mappedBy, bidirectional helper methods
-- [ ] 8. Cascade types vs orphanRemoval
-- [ ] 9. List vs Set for to-many; MultipleBagFetchException
-- [ ] 10. equals()/hashCode() for entities
-- [ ] 11. @Embeddable and inheritance strategies
+- [ ] **6.** ID generation strategies (IDENTITY, SEQUENCE, UUID) and batching impact
+- [ ] **7.** Owning side, mappedBy, bidirectional helper methods
+- [ ] **8.** Cascade types vs orphanRemoval
+- [ ] **9.** List vs Set for to-many; MultipleBagFetchException
+- [ ] **10.** equals()/hashCode() for entities
+- [ ] **11.** @Embeddable and inheritance strategies
 
 **Fetching & performance**
-- [ ] ⭐ 12. LAZY vs EAGER; why ManyToOne should be lazy
-- [ ] ⭐ 13. LazyInitializationException — right fixes vs anti-patterns
-- [ ] ⭐ 14. N+1 problem — JOIN FETCH, @EntityGraph, batch size
-- [ ] 15. Projections — interface, DTO, record
-- [ ] 16. Efficient batch inserts/updates
-- [ ] 17. L1 vs L2 cache, query cache
+- [ ] ⭐ **12.** LAZY vs EAGER; why ManyToOne should be lazy
+- [ ] ⭐ **13.** LazyInitializationException — right fixes vs anti-patterns
+- [ ] ⭐ **14.** N+1 problem — JOIN FETCH, @EntityGraph, batch size
+- [ ] **15.** Projections — interface, DTO, record
+- [ ] **16.** Efficient batch inserts/updates
+- [ ] **17.** L1 vs L2 cache, query cache
 
 **Repositories**
-- [ ] 18. Repository hierarchy (CrudRepository, ListCrudRepository, JpaRepository)
-- [ ] 19. Derived queries vs @Query (JPQL / native)
-- [ ] 20. @Modifying and clearAutomatically
-- [ ] 21. Specifications / Criteria API / Querydsl
-- [ ] 22. Page vs Slice vs keyset (scroll) pagination
-- [ ] 23. Custom repository implementations
-- [ ] 24. Auditing (@CreatedDate, @LastModifiedBy, @EnableJpaAuditing)
+- [ ] **18.** Repository hierarchy (CrudRepository, ListCrudRepository, JpaRepository)
+- [ ] **19.** Derived queries vs @Query (JPQL / native)
+- [ ] **20.** @Modifying and clearAutomatically
+- [ ] **21.** Specifications / Criteria API / Querydsl
+- [ ] **22.** Page vs Slice vs keyset (scroll) pagination
+- [ ] **23.** Custom repository implementations
+- [ ] **24.** Auditing (@CreatedDate, @LastModifiedBy, @EnableJpaAuditing)
 
 **Transactions & concurrency**
-- [ ] ⭐ 25. How @Transactional works (proxies, self-invocation, checked vs unchecked rollback)
-- [ ] ⭐ 26. Propagation — REQUIRED vs REQUIRES_NEW
-- [ ] 27. Isolation levels and anomalies
-- [ ] 28. What readOnly = true really does
-- [ ] ⭐ 29. Optimistic (@Version) vs pessimistic locking
+- [ ] ⭐ **25.** How @Transactional works (proxies, self-invocation, checked vs unchecked rollback)
+- [ ] ⭐ **26.** Propagation — REQUIRED vs REQUIRES_NEW
+- [ ] **27.** Isolation levels and anomalies
+- [ ] **28.** What readOnly = true really does
+- [ ] ⭐ **29.** Optimistic (@Version) vs pessimistic locking
 
 **Production & testing**
-- [ ] 30. HikariCP connection pooling
-- [ ] 31. Flyway / Liquibase vs ddl-auto
-- [ ] 32. @DataJpaTest with Testcontainers instead of H2
-- [ ] 33. Soft delete (Hibernate @SoftDelete)
+- [ ] **30.** HikariCP connection pooling
+- [ ] **31.** Flyway / Liquibase vs ddl-auto
+- [ ] **32.** @DataJpaTest with Testcontainers instead of H2
+- [ ] **33.** Soft delete (Hibernate @SoftDelete)
+
+---
 
 ### 5. Spring AOP (ID: AOP)
 
-- [ ] ⭐ 1. What is AOP and what problems does it solve?
-- [ ] 2. Terminology — aspect, advice, join point, pointcut, target, weaving
-- [ ] ⭐ 3. Advice types and when to use each
-- [ ] 4. Why @Around is most powerful; forgetting proceed()
-- [ ] 5. JoinPoint vs ProceedingJoinPoint
-- [ ] ⭐ 6. How Spring AOP works internally — JDK proxy vs CGLIB
-- [ ] ⭐ 7. Self-invocation problem and fixes
-- [ ] 8. Why final/private/static methods can't be advised
-- [ ] ⭐ 9. Spring features built on AOP (@Transactional, @Cacheable, @Async, @PreAuthorize, @Retryable)
-- [ ] ⭐ 10. Custom annotation aspect (e.g. @LogExecutionTime)
-- [ ] 11. Pointcut expressions — execution, within, @annotation, args
-- [ ] 12. Ordering multiple aspects (@Order)
-- [ ] 13. Spring AOP vs AspectJ
+- [ ] ⭐ **1.** What is AOP and what problems does it solve?
+- [ ] **2.** Terminology — aspect, advice, join point, pointcut, target, weaving
+- [ ] ⭐ **3.** Advice types and when to use each
+- [ ] **4.** Why @Around is most powerful; forgetting proceed()
+- [ ] **5.** JoinPoint vs ProceedingJoinPoint
+- [ ] ⭐ **6.** How Spring AOP works internally — JDK proxy vs CGLIB
+- [ ] ⭐ **7.** Self-invocation problem — why it bypasses @Transactional/@Async, and fixes
+- [ ] **8.** Why final/private/static methods can't be advised
+- [ ] ⭐ **9.** Spring features built on AOP (@Transactional, @Cacheable, @Async, @PreAuthorize, @Retryable)
+- [ ] ⭐ **10.** Custom annotation aspect (e.g. @LogExecutionTime)
+- [ ] **11.** Pointcut expressions — execution, within, @annotation, args
+- [ ] **12.** Ordering multiple aspects (@Order)
+- [ ] **13.** Spring AOP vs AspectJ
+
+---
 
 ### 6. Spring Security (ID: Security)
 
 **Avoid outdated answers:** WebSecurityConfigurerAdapter → SecurityFilterChain bean; antMatchers/authorizeRequests → requestMatchers/authorizeHttpRequests; @EnableGlobalMethodSecurity → @EnableMethodSecurity; default encoder = DelegatingPasswordEncoder (BCrypt).
 
 **Architecture**
-- [ ] ⭐ 1. Filter chain — DelegatingFilterProxy → FilterChainProxy → SecurityFilterChain
-- [ ] ⭐ 2. Core components — SecurityContextHolder, Authentication, AuthenticationManager, ProviderManager, AuthenticationProvider, UserDetailsService
-- [ ] ⭐ 3. Username/password authentication flow
-- [ ] 4. How ProviderManager picks a provider (supports())
-- [ ] 5. SecurityContextHolder ThreadLocal; @Async and virtual threads
-- [ ] ⭐ 6. Configuring with SecurityFilterChain; multiple chains
+- [ ] ⭐ **1.** Filter chain — DelegatingFilterProxy → FilterChainProxy → SecurityFilterChain
+- [ ] ⭐ **2.** Core components — SecurityContextHolder, Authentication, AuthenticationManager, ProviderManager, AuthenticationProvider, UserDetailsService
+- [ ] ⭐ **3.** Username/password authentication flow
+- [ ] **4.** How ProviderManager picks a provider (supports())
+- [ ] **5.** SecurityContextHolder ThreadLocal; @Async and virtual threads
+- [ ] ⭐ **6.** Configuring with SecurityFilterChain; multiple chains
 
 **Authorization**
-- [ ] 7. Role vs Authority (ROLE_ prefix)
-- [ ] 8. authorizeHttpRequests + requestMatchers
-- [ ] ⭐ 9. Method security — @EnableMethodSecurity, @PreAuthorize vs @Secured
-- [ ] 10. 401 vs 403 — AuthenticationEntryPoint vs AccessDeniedHandler
+- [ ] **7.** Role vs Authority (ROLE_ prefix)
+- [ ] **8.** authorizeHttpRequests + requestMatchers
+- [ ] ⭐ **9.** Method security — @EnableMethodSecurity, @PreAuthorize vs @Secured
+- [ ] **10.** 401 vs 403 — AuthenticationEntryPoint vs AccessDeniedHandler
 
 **Passwords**
-- [ ] 11. PasswordEncoder / DelegatingPasswordEncoder, BCrypt/Argon2, salting
+- [ ] **11.** PasswordEncoder / DelegatingPasswordEncoder, BCrypt/Argon2, salting
 
 **Stateful vs stateless**
-- [ ] ⭐ 12. Session vs token auth; SessionCreationPolicy.STATELESS
-- [ ] ⭐ 13. JWT structure (header, payload, signature); signed vs encrypted
-- [ ] ⭐ 14. Implementing JWT — custom filter vs OAuth2 Resource Server
-- [ ] 15. Access vs refresh tokens, expiry, revocation
+- [ ] ⭐ **12.** Session vs token auth; SessionCreationPolicy.STATELESS
+- [ ] ⭐ **13.** JWT structure (header, payload, signature); signed vs encrypted
+- [ ] ⭐ **14.** Implementing JWT — custom filter vs OAuth2 Resource Server
+- [ ] **15.** Access vs refresh tokens, expiry, revocation
 
 **OAuth2 / OIDC**
-- [ ] 16. OAuth2 roles
-- [ ] ⭐ 17. Grant types — Authorization Code + PKCE, Client Credentials; deprecated flows
-- [ ] 18. OAuth2 vs OIDC vs JWT
-- [ ] 19. oauth2Login vs oauth2ResourceServer vs Spring Authorization Server
-- [ ] 20. Service-to-service auth with Client Credentials
+- [ ] **16.** OAuth2 roles
+- [ ] ⭐ **17.** Grant types — Authorization Code + PKCE, Client Credentials; deprecated flows
+- [ ] **18.** OAuth2 vs OIDC vs JWT
+- [ ] **19.** oauth2Login vs oauth2ResourceServer vs Spring Authorization Server
+- [ ] **20.** Service-to-service auth with Client Credentials
 
 **Attacks & protection**
-- [ ] ⭐ 21. CSRF — when to disable, when not to
-- [ ] 22. CORS in Spring Security
-- [ ] 23. Brute-force prevention
-- [ ] 24. REST API security best practices
+- [ ] ⭐ **21.** CSRF — when to disable, when not to
+- [ ] **22.** CORS in Spring Security
+- [ ] **23.** Brute-force prevention
+- [ ] **24.** REST API security best practices
 
 **Modern & testing**
-- [ ] 25. Passkeys/WebAuthn, one-time-token login
-- [ ] 26. Logout in stateless vs stateful apps
-- [ ] 27. Testing with @WithMockUser, jwt(), csrf()
+- [ ] **25.** Passkeys/WebAuthn, one-time-token login
+- [ ] **26.** Logout in stateless vs stateful apps
+- [ ] **27.** Testing with @WithMockUser, jwt(), csrf()
+
+---
 
 ### 7. Microservices — concepts & patterns (ID: MS)
 
 **Fundamentals**
-- [ ] 1. Monolith vs microservices; when NOT to use microservices
-- [ ] 2. Decomposition — bounded contexts / DDD
-- [ ] 3. Database per service — why, and the problems it creates
-- [ ] 4. Sync (REST) vs async (messaging) communication
+- [ ] **1.** Monolith vs microservices; when NOT to use microservices
+- [ ] **2.** Decomposition — bounded contexts / DDD
+- [ ] **3.** Database per service — why, and the problems it creates
+- [ ] **4.** Sync (REST) vs async (messaging) communication
 
 **Data consistency**
-- [ ] ⭐ 5. Why avoid distributed transactions / 2PC
-- [ ] ⭐ 6. Saga — choreography vs orchestration
-- [ ] ⭐ 7. Transactional Outbox
-- [ ] ⭐ 8. Eventual consistency, idempotent consumers
-- [ ] 9. CQRS and event sourcing basics
+- [ ] ⭐ **5.** Why avoid distributed transactions / 2PC
+- [ ] ⭐ **6.** Saga — choreography vs orchestration
+- [ ] ⭐ **7.** Transactional Outbox
+- [ ] ⭐ **8.** Eventual consistency, idempotent consumers
+- [ ] **9.** CQRS and event sourcing basics
 
 **Resilience & communication**
-- [ ] ⭐ 10. Circuit breaker, retry, timeout, bulkhead, rate limiter
-- [ ] 11. API Gateway and Backend-for-Frontend
-- [ ] 12. Service discovery — client-side vs server-side
-- [ ] 13. Kafka — topics, partitions, consumer groups, ordering
+- [ ] ⭐ **10.** Circuit breaker, retry, timeout, bulkhead, rate limiter
+- [ ] **11.** API Gateway and Backend-for-Frontend
+- [ ] **12.** Service discovery — client-side vs server-side
+- [ ] **13.** Kafka — topics, partitions, consumer groups, ordering
 
 **Operations**
-- [ ] 14. Distributed tracing, centralized logging, correlation IDs
-- [ ] 15. Externalized config, 12-factor app
-- [ ] 16. Docker, Kubernetes basics, blue-green / canary
-- [ ] 17. Securing service-to-service calls (token relay, Client Credentials, mTLS)
-- [ ] 18. API versioning and backward compatibility
+- [ ] **14.** Distributed tracing, centralized logging, correlation IDs
+- [ ] **15.** Externalized config, 12-factor app
+- [ ] **16.** Docker, Kubernetes basics, blue-green / canary
+- [ ] **17.** Securing service-to-service calls (token relay, Client Credentials, mTLS)
+- [ ] **18.** API versioning and backward compatibility
+
+---
 
 ### 8. Spring Cloud (ID: Cloud)
 
-- [ ] ⭐ 1. Retired Netflix stack and replacements (Hystrix → Resilience4j, Ribbon → LoadBalancer, Zuul → Gateway, Sleuth → Micrometer Tracing)
-- [ ] 2. Release trains and Boot compatibility
-- [ ] 3. Config Server, @RefreshScope, Spring Cloud Bus
-- [ ] 4. Eureka — registration, heartbeats, self-preservation
-- [ ] 5. Spring Cloud LoadBalancer
-- [ ] ⭐ 6. Spring Cloud Gateway — routes, predicates, filters, rate limiting, auth
-- [ ] ⭐ 7. Resilience4j circuit breaker states and fallbacks
-- [ ] 8. OpenFeign vs HTTP interface clients
-- [ ] 9. Spring Cloud Stream (Kafka/RabbitMQ binders, functional consumers)
-- [ ] 10. Micrometer Tracing + Zipkin / OpenTelemetry
-- [ ] 11. On Kubernetes: Eureka/Config Server vs K8s Services/ConfigMaps/Secrets
+- [ ] ⭐ **1.** Retired Netflix stack and replacements (Hystrix → Resilience4j, Ribbon → LoadBalancer, Zuul → Gateway, Sleuth → Micrometer Tracing)
+- [ ] **2.** Release trains and Boot compatibility
+- [ ] **3.** Config Server, @RefreshScope, Spring Cloud Bus
+- [ ] **4.** Eureka — registration, heartbeats, self-preservation
+- [ ] **5.** Spring Cloud LoadBalancer
+- [ ] ⭐ **6.** Spring Cloud Gateway — routes, predicates, filters, rate limiting, auth
+- [ ] ⭐ **7.** Resilience4j circuit breaker states and fallbacks
+- [ ] **8.** OpenFeign vs HTTP interface clients
+- [ ] **9.** Spring Cloud Stream (Kafka/RabbitMQ binders, functional consumers)
+- [ ] **10.** Micrometer Tracing + Zipkin / OpenTelemetry
+- [ ] **11.** On Kubernetes: Eureka/Config Server vs K8s Services/ConfigMaps/Secrets
+
+---
 
 ### 9. Spring Testing (ID: Test)
 
 **Fundamentals**
-- [ ] 1. Testing pyramid — unit vs integration vs E2E
-- [ ] 2. JUnit 5 — lifecycle, @ParameterizedTest, @Nested, assertions
-- [ ] 3. Mockito — @Mock vs @Spy vs @InjectMocks, verify, captors, void methods
+- [ ] **1.** Testing pyramid — unit vs integration vs E2E
+- [ ] **2.** JUnit 5 — lifecycle, @ParameterizedTest, @Nested, assertions
+- [ ] **3.** Mockito — @Mock vs @Spy vs @InjectMocks, verify, captors, void methods
 
 **Spring Boot testing**
-- [ ] ⭐ 4. @SpringBootTest vs slices (@WebMvcTest, @DataJpaTest, @JsonTest, @RestClientTest)
-- [ ] ⭐ 5. @MockitoBean / @MockitoSpyBean vs plain Mockito; @MockBean deprecated
-- [ ] 6. TestContext caching; cost of @DirtiesContext
-- [ ] 7. MockMvc / MockMvcTester / WebTestClient
-- [ ] 8. RANDOM_PORT with TestRestTemplate or a real client
-- [ ] 9. Security tests — @WithMockUser, jwt()
+- [ ] ⭐ **4.** @SpringBootTest vs slices (@WebMvcTest, @DataJpaTest, @JsonTest, @RestClientTest)
+- [ ] ⭐ **5.** @MockitoBean / @MockitoSpyBean vs plain Mockito; @MockBean deprecated
+- [ ] **6.** TestContext caching; cost of @DirtiesContext
+- [ ] **7.** MockMvc / MockMvcTester / WebTestClient
+- [ ] **8.** RANDOM_PORT with TestRestTemplate or a real client
+- [ ] **9.** Security tests — @WithMockUser, jwt()
 
 **Integration testing**
-- [ ] ⭐ 10. Testcontainers vs H2; @ServiceConnection, @DynamicPropertySource
-- [ ] 11. WireMock / MockRestServiceServer
-- [ ] 12. Testing Kafka (embedded vs Testcontainers)
-- [ ] 13. @Transactional in tests — rollback and pitfalls
+- [ ] ⭐ **10.** Testcontainers vs H2; @ServiceConnection, @DynamicPropertySource
+- [ ] **11.** WireMock / MockRestServiceServer
+- [ ] **12.** Testing Kafka (embedded vs Testcontainers)
+- [ ] **13.** @Transactional in tests — rollback and pitfalls
 
 **Microservice testing**
-- [ ] 14. Contract testing — Spring Cloud Contract / Pact
-- [ ] 15. ArchUnit architecture tests
+- [ ] **14.** Contract testing — Spring Cloud Contract / Pact
+- [ ] **15.** ArchUnit architecture tests
 
 ---
-
-## Part 3 — Short-on-time priority list
-
-- **Core:** 1–8, 11, 12, 15, 21, 24
-- **Boot:** 2, 3, 5, 6, 9, 13, 18, 21–23
-- **REST:** 2, 3, 5, 9, 11, 16, 18, 24, 27
-- **JPA:** 2, 3, 12–14, 25, 26, 29
-- **AOP:** 1, 3, 6, 7, 9, 10
-- **Security:** 1–3, 6, 9, 12–14, 17, 21
-- **MS:** 5–8, 10
-- **Cloud:** 1, 6, 7
-- **Test:** 4, 5, 10
