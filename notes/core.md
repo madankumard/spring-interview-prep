@@ -607,3 +607,224 @@ public class CheckoutService {
 - Honestly it is **rare** in typical applications. If the object doesn't need **injected dependencies or Spring features**, it's simpler to create it with `new` or through a small factory.
 
 - Prototype scope is worth it when the object is stateful **and** needs things from the container, such as injected services or configuration.
+
+## Core 8 — Are singleton beans thread-safe? How to make them safe?
+
+**Answer:**
+- **No, not automatically.** Singleton scope only guarantees that there is **one instance** of the bean. It says nothing about thread safety, and Spring adds **no synchronization** of its own.
+
+- In a web application that one instance is called by **many request threads at the same time**. Whether that is safe depends entirely on **how I write the class**.
+
+- A singleton is thread-safe when it is **stateless**. Its fields are only **final references to other beans**, and all request data travels through **method parameters and local variables**, which live on each thread's own stack.
+
+- It becomes unsafe as soon as it has a **mutable field that several threads read and write**, such as a counter, a list or a "current user" field. Then two threads can overwrite each other's values, which is a **race condition**.
+
+- So the main way to make a singleton safe is to **keep it stateless**. If I really need shared state, I use **thread-safe types** like `AtomicInteger` or `ConcurrentHashMap`, or **synchronization**, or I move the state out to the **database or a cache**.
+
+**Key points:**
+- **Why stateless is safe:** Each thread has its **own stack**, so parameters and local variables are private to the call. The bean itself holds nothing that changes, so there is **nothing for threads to fight over**.
+
+```java
+@Service
+public class OrderService {
+    private final NotificationService notificationService;   // final, never changes
+
+    public void placeOrder(String email, String product) {   // per-thread parameters
+        String message = "Order placed for " + product;      // per-thread local variable
+        notificationService.send(email, message);
+    }
+}
+```
+
+- **What a race condition looks like:** `count++` looks like one step but is really three: **read, add one, write back**. Two threads can both read the same value and both write the same result, so **one update is lost**.
+
+```java
+@Component
+public class UnsafeViewCounter {
+    private int count;                 // shared mutable state
+
+    public void increment() {
+        count++;                       // not atomic: updates get lost under load
+    }
+}
+```
+
+- **Fix 1, remove the state (best):** Most of the time the field shouldn't exist. I pass the data as a **parameter**, keep it in a **local variable**, or store it in the **database**.
+
+- **Fix 2, immutable state:** State that is set once and **never changes** is safe to share. Configuration values injected through the constructor into **`final` fields** are the typical example.
+
+- **Fix 3, thread-safe types:** When shared mutable state is really needed, such as an in-memory counter or cache, I use classes from `java.util.concurrent`. **`AtomicInteger`** and **`LongAdder`** for counters, **`ConcurrentHashMap`** for maps.
+
+```java
+@Component
+public class SafeViewCounter {
+    private final AtomicInteger count = new AtomicInteger();
+
+    public void increment() {
+        count.incrementAndGet();       // atomic, no lost updates
+    }
+}
+```
+
+- **Fix 4, synchronization:** A **`synchronized`** method or a `ReentrantLock` lets only one thread in at a time. It's correct but it makes threads **wait for each other**, so I keep the locked section small and prefer the concurrent types where they fit.
+
+- **Fix 5, per-thread or per-request state:** A **`ThreadLocal`** gives each thread its own copy, and a **request-scoped bean** gives each HTTP request its own instance. Spring itself uses `ThreadLocal` for the security context and for transactions.
+
+- **Classic unsafe fields:** A `HashMap` or `ArrayList` used as a cache, a plain `int` or `long` counter, a `SimpleDateFormat`, and any field that stores **data about the current request or user**.
+
+**Follow-ups:**
+
+### Q: If singletons are not thread-safe by default, why is singleton the default scope?
+- Because the typical Spring bean is a **stateless service**, and a stateless object is **naturally thread-safe**. One shared instance is all that's needed.
+
+- It's also **efficient**. Creating one instance at startup is cheaper than creating objects for every request, and there is less work for the garbage collector.
+
+- So the design assumption is that beans hold **behaviour** and data lives elsewhere, in **method parameters, entities and the database**. Thread safety is the developer's responsibility, and staying stateless is how to meet it.
+
+---
+
+### Q: Controllers, services and repositories are all singletons. Are they thread-safe?
+- **Yes, as long as I keep them stateless**, which is the normal way to write them. A controller receives the request data as **method arguments**, calls a service, and returns a result, without storing anything in fields.
+
+- The bug appears when someone adds a field such as `private User currentUser` or `private List<Item> items` to one of these classes. That field is then **shared by every request**.
+
+- Spring's own infrastructure beans are written to be thread-safe. For example `RestClient`, `JdbcTemplate` and `ObjectMapper` are **safe to share** once they are configured.
+
+---
+
+### Q: How can a singleton inject an EntityManager or HttpServletRequest, which are per-request objects?
+- Spring doesn't inject the real object. It injects a **thread-safe proxy**, and that single proxy is safe to keep in a singleton's field.
+
+- On each call the proxy **looks up the real object for the current thread**. For `EntityManager` that is the one bound to the current **transaction**, and for `HttpServletRequest` it's the **current request**.
+
+- So many threads share the same proxy but each one is routed to **its own underlying object**. This is the same idea as the scoped proxy used for request-scoped beans.
+
+---
+
+### Q: synchronized, AtomicInteger or ConcurrentHashMap, when do you use which?
+- **`AtomicInteger`, `AtomicLong` and `LongAdder`** are for a **single number** such as a counter. They are lock-free, so they stay fast under contention.
+
+- **`ConcurrentHashMap`** is for a **shared map**, such as an in-memory cache. Methods like `computeIfAbsent()` and `merge()` make check-then-update operations atomic.
+
+- **`synchronized` or a `ReentrantLock`** is for when **several fields or several steps** must change together as one unit. It's the most general tool but also the one that makes threads wait.
+
+- A common mistake is combining two thread-safe calls and assuming the result is safe. `if (!map.containsKey(k)) map.put(k, v)` is **still a race**, because another thread can get in between the two calls.
+
+---
+
+### Q: Does synchronized make the bean safe when the application runs on several instances?
+- **No.** `synchronized`, locks and atomic classes only work **inside one JVM**. Each instance of the application has its **own copy of the singleton** and its own lock.
+
+- In production there are usually several instances behind a load balancer, so shared data must be protected **where it is stored**. That means **database transactions**, **optimistic locking with `@Version`**, pessimistic locks, or a **distributed lock** in something like Redis.
+
+- This is another reason to keep beans stateless: state held in memory is **neither shared nor consistent** across instances.
+
+---
+
+### Q: What is ThreadLocal and what are the risks of using it?
+- A `ThreadLocal` is a variable where **each thread has its own independent value**. It's used for context that belongs to the current request but isn't passed as a parameter, such as the **security context**, the **current transaction** and logging **MDC** values.
+
+- The main risk comes from **thread pools**. Threads are reused, so a value left behind by one request can **leak into the next request** handled by the same thread. The rule is to always **`remove()` it in a `finally` block**.
+
+- The value also **doesn't follow the work to another thread**, so an `@Async` method or a new thread won't see it unless the context is propagated explicitly.
+## Core 9 — Constructor vs setter vs field injection — why constructor is preferred
+
+**Answer:**
+- Spring can inject a dependency in three ways: through the **constructor**, through a **setter method**, or **directly into a field** with `@Autowired`. All three give the bean the same object, but they differ in **when** the dependency is set, whether it can be **`final`**, and how easy the class is to **test without Spring**.
+
+- **Constructor injection** is the recommended way, and the Spring team itself says so. The dependencies become **`final` fields**, so the object is **fully built and immutable** the moment it exists, and a missing dependency makes the app **fail at startup** instead of throwing a `NullPointerException` later.
+
+- **Setter injection** is for **optional** dependencies, or ones that may legitimately be **changed after creation**. The downside is that the object can exist in a **half-initialised state** until the setter is called.
+
+- **Field injection** is the shortest to write, but it **hides dependencies**, can't use `final`, and the class **can't be created with `new` in a unit test** without reflection. That's why IntelliJ flags it with a warning and it's considered bad practice in application code.
+
+- Since **Spring 4.3**, if a class has **only one constructor**, `@Autowired` on it is **optional**. So in modern code constructor injection is also the least verbose option, especially with **Java records** or Lombok's `@RequiredArgsConstructor`.
+
+**Key points:**
+- **Constructor injection**: dependencies are required, `final`, and visible in the constructor signature. With a single constructor, no annotation is needed.
+```java
+@Service
+public class OrderService {
+    private final NotificationService notificationService;
+
+    public OrderService(NotificationService notificationService) {
+        this.notificationService = notificationService;
+    }
+}
+```
+
+- **Setter injection**: Spring first creates the object with the no-arg constructor, then calls the setter. Use **`@Autowired(required = false)`** to make the dependency optional.
+```java
+private NotificationService notificationService;
+
+@Autowired
+public void setNotificationService(NotificationService notificationService) {
+    this.notificationService = notificationService;
+}
+```
+
+- **Field injection**: Spring sets the private field **through reflection** after construction. Outside Spring the field simply stays `null`.
+```java
+@Autowired
+private NotificationService notificationService;
+```
+
+- **Testability** is the strongest practical argument. With constructor injection, a unit test passes a **fake or mock** straight into `new`, with no Spring context and no reflection.
+```java
+NotificationService fake = (to, msg) -> sent.add(msg);
+new OrderService(fake).placeOrder("bob@shoplite.com", "Mouse");
+```
+
+- **Fail-fast**: with constructor injection, a missing bean is reported as **`UnsatisfiedDependencyException` at startup**. With field injection in a plain `new` call, you only find out with an **NPE at runtime**.
+
+- **Design smell detector**: a constructor with **eight parameters** is an obvious signal that the class does too much. Field injection hides that, because adding another `@Autowired` field costs nothing visually.
+
+- **Circular dependencies**: with constructor injection, Spring **can't** resolve A → B → A and fails with `BeanCurrentlyInCreationException`. This is a good thing, because since **Boot 2.6 circular references are banned by default** anyway, and the error points at a design problem.
+
+**Follow-ups:**
+
+### Q: Why is field injection considered bad if it works fine?
+- It works inside Spring, but it **couples the class to the container**. The class can't be created correctly with `new`, so unit tests need Spring, Mockito's `@InjectMocks`, or `ReflectionTestUtils` just to set a field.
+
+- The fields can't be **`final`**, so the object is **mutable** and could be in an incomplete state. Its dependencies are also **invisible from the outside**, because nothing in the public API tells you what the class needs.
+
+- It's still acceptable in **test classes**, for example `@Autowired` in a `@SpringBootTest`, because nobody creates test classes with `new`.
+
+---
+
+### Q: When would you actually use setter injection?
+- For **optional dependencies** with a sensible default, marked with `@Autowired(required = false)`. If no matching bean exists, Spring simply doesn't call the setter and the class uses its fallback.
+
+- For dependencies that may need to be **reconfigured after creation**, which is rare in application code but common in framework and infrastructure classes.
+
+- A modern alternative for optional dependencies is to inject **`ObjectProvider<T>`** or **`Optional<T>`** through the constructor. That keeps the field `final` and still allows the bean to be missing.
+
+---
+
+### Q: Do you need @Autowired on the constructor?
+- **No, not if the class has only one constructor.** Since Spring 4.3, Spring automatically uses the single constructor for injection.
+
+- If the class has **several constructors**, you must mark the one Spring should use with **`@Autowired`**. Otherwise Spring tries the no-arg constructor and fails if there isn't one.
+
+---
+
+### Q: How does constructor injection handle circular dependencies?
+- It **can't resolve them**. To create A, Spring needs B, and to create B it needs A, so neither can be constructed first and startup fails with **`BeanCurrentlyInCreationException`**.
+
+- Setter and field injection could work around it, because Spring can create A half-done and inject it into B. But since **Spring Boot 2.6**, `spring.main.allow-circular-references` is **`false` by default**, so Boot rejects those cycles too.
+
+- The right fix is to **redesign**: extract the shared logic into a third bean, use an **event**, or as a last resort mark one parameter **`@Lazy`** so Spring injects a proxy.
+
+---
+
+### Q: How does Lombok or a record fit into this?
+- Lombok's **`@RequiredArgsConstructor`** generates a constructor for all `final` fields. You get constructor injection with **no boilerplate**, and it's very common in real projects.
+
+- A Spring bean can't usually be a **record**, but records are perfect for the **configuration properties** and **DTOs** those beans use. `@ConfigurationProperties` records are bound through their constructor in the same spirit.
+
+---
+
+### Q: Does injection style affect @Value or configuration properties?
+- `@Value` works on **constructor parameters**, setters and fields, exactly like `@Autowired`. Putting it on a constructor parameter keeps the value **`final`**.
+
+- For groups of related settings, a **`@ConfigurationProperties` record** injected through the constructor is cleaner than many separate `@Value` fields.

@@ -118,7 +118,7 @@ You don't need to do them separately — answering the questions in order covers
 - [x] ⭐ **5.** Full bean lifecycle walkthrough
 - [x] ⭐ **6.** What are the different bean scopes in Spring?
 - [x] ⭐ **7.** Singleton vs prototype — the differences
-- [ ] ⭐ **8.** Are singleton beans thread-safe? How to make them safe?
+- [x] ⭐ **8.** Are singleton beans thread-safe? How to make them safe?
 - [ ] ⭐ **9.** Constructor vs setter vs field injection — why constructor is preferred
 - [ ] **10.** Why is @Autowired optional on a single constructor?
 
