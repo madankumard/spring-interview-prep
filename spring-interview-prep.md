@@ -119,27 +119,26 @@ You don't need to do them separately — answering the questions in order covers
 - [x] ⭐ **6.** What are the different bean scopes in Spring?
 - [x] ⭐ **7.** Singleton vs prototype — the differences
 - [x] ⭐ **8.** Are singleton beans thread-safe? How to make them safe?
-- [ ] ⭐ **9.** Constructor vs setter vs field injection — why constructor is preferred
-- [ ] **10.** Why is @Autowired optional on a single constructor?
+- [x] ⭐ **9.** Constructor vs setter vs field injection — why constructor is preferred
 
 **Configuration & annotations**
-- [ ] **11.** How does @ComponentScan find beans?
-- [ ] ⭐ **12.** @Component vs @Service vs @Repository vs @Controller
-- [ ] ⭐ **13.** @Bean vs @Component
-- [ ] **14.** @Configuration vs @Component with @Bean methods (proxyBeanMethods)
-- [ ] **15.** How does @Autowired resolve dependencies (type → qualifier → name)?
-- [ ] ⭐ **16.** NoUniqueBeanDefinitionException — @Primary vs @Qualifier
-- [ ] **17.** NoSuchBeanDefinitionException — causes and fixes
-- [ ] **18.** @Value vs @ConfigurationProperties (incl. records)
-- [ ] **19.** @Profile and @Conditional (foundation of auto-configuration)
-- [ ] **20.** @Lazy — what and when
+- [x] **10.** How does @ComponentScan find beans?
+- [ ] ⭐ **11.** @Component vs @Service vs @Repository vs @Controller
+- [ ] ⭐ **12.** @Bean vs @Component
+- [ ] **13.** @Configuration vs @Component with @Bean methods (proxyBeanMethods)
+- [ ] **14.** How does @Autowired resolve dependencies (type → qualifier → name)?
+- [ ] ⭐ **15.** NoUniqueBeanDefinitionException — @Primary vs @Qualifier
+- [ ] **16.** NoSuchBeanDefinitionException — causes and fixes
+- [ ] **17.** @Value vs @ConfigurationProperties (incl. records)
+- [ ] **18.** @Profile and @Conditional (foundation of auto-configuration)
+- [ ] **19.** @Lazy — what and when
 
 **Advanced**
-- [ ] **21.** Prototype inside singleton (ObjectProvider, @Lookup)
-- [ ] ⭐ **22.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
-- [ ] **23.** BeanPostProcessor vs BeanFactoryPostProcessor
-- [ ] **24.** ApplicationEvent, @EventListener, @TransactionalEventListener
-- [ ] **25.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
+- [ ] **20.** Prototype inside singleton (ObjectProvider, @Lookup)
+- [ ] ⭐ **21.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
+- [ ] **22.** BeanPostProcessor vs BeanFactoryPostProcessor
+- [ ] **23.** ApplicationEvent, @EventListener, @TransactionalEventListener
+- [ ] **24.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
 
 ---
 

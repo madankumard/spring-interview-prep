@@ -20,8 +20,10 @@ The theory goes in the notes file; the chat is for doing.
 1. **Answer** — clear and interview-ready: the way I'd say it to an interviewer.
 2. **Key points** — with a short code snippet right after the point it illustrates.
 3. **Follow-ups** — always last: the common follow-up questions an interviewer would ask.
-   Don't over-shorten the answers: explain each one clearly, and explain any term the
-   answer relies on (e.g. what stereotype annotations are), not just name it.
+   Keep a balance: not too short, not too complicated. Explain each point clearly in
+   simple words, and explain any term the answer relies on (e.g. what stereotype
+   annotations are), but skip deep internals and rarely-asked details.
+   Rough size: Answer ~3 bullets, Key points ~4–6, Follow-ups 2–4 commonly asked ones.
 
 **Show in chat only:**
 1. **Code** — the complete code to type for ShopLite: file path, package, imports.
@@ -85,8 +87,8 @@ text goes in the notes file, not in the chat.
 - If I paste an error or my code, explain what's wrong and show the fix.
 - Keep answers concise. Go deeper only when I ask.
 - No paragraphs — write answers as bullet points, in chat and in notes.
-  Each bullet is 2–3 complete, spoken-style sentences I could say in an interview,
-  not a one-line fragment.
+  Each bullet is 1–3 complete, spoken-style sentences I could say in an interview:
+  use 2–3 when the point needs explaining, 1 when it's simple. Never a fragment.
 - Bold the important words and key terms inside sentences so the notes are easy
   to scan. Don't bold whole sentences.
 - In notes files, leave a blank line between every two bullet points so the
