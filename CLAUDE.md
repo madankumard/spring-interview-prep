@@ -28,11 +28,10 @@ The theory goes in the notes file; the chat is for doing.
 **Show in chat only:**
 1. **Code** — the complete code to type for ShopLite: file path, package, imports.
    One line before each file saying what it demonstrates.
-2. **Steps** — numbered step-by-step instructions: what to create, what to change,
-   what to run, in order.
-3. **Verify** — what to look for (logs, output, HTTP response), plus an optional
-   "break it" step when it teaches something.
-4. End with one line saying the notes were saved to `notes/<topic>.md`.
+2. **Steps & Verify** — one numbered list: each step says what to create, change or
+   run, and right under it (indented "→ Expect:" line) what to look for (logs, output,
+   HTTP response). Include an optional "break it" step when it teaches something.
+3. End with one line saying the notes were saved to `notes/<topic>.md`.
 
 If I ask a side question about a topic (not a new question ID), answer it in chat normally.
 

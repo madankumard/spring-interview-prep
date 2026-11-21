@@ -665,3 +665,65 @@ public @interface UseCase { }
 - Spring treats the String as a **view name** and tries to render a template with that name. Without a matching template, you get an **error page** instead of your text.
 
 - To return the text or JSON itself, add **`@ResponseBody`** to the method, or use **`@RestController`** on the class.
+
+## Core 12 — @Bean vs @Component
+
+**Answer:**
+- Both register an object as a **Spring bean**, but in different ways. **`@Component`** goes **on a class**, and component scanning finds it and creates the object for me. **`@Bean`** goes **on a method** inside a `@Configuration` class, and Spring registers **whatever that method returns**.
+
+- I use **`@Component`** (or `@Service`, `@Repository`, `@Controller`) for **my own classes**. It's the simplest option because Spring creates the object automatically.
+
+- I use **`@Bean`** when I **can't or don't want to annotate the class**, mainly **library classes** like `Clock` or `ObjectMapper`. It's also the choice when creating the object needs **custom logic**, like reading a property to decide which implementation to build.
+
+**Key points:**
+- **`@Component`, on the class**: Spring finds it by scanning and calls the constructor itself.
+```java
+@Component
+public class SkuGenerator { ... }
+```
+
+- **`@Bean`, on a method**: I write the creation code myself, and the **returned object** becomes the bean. The method lives in a **`@Configuration`** class.
+```java
+@Configuration
+public class AppConfig {
+    @Bean
+    Clock clock() {
+        return Clock.systemUTC();      // library class: I can't put @Component on it
+    }
+}
+```
+
+- **Custom creation logic**: inside a `@Bean` method I can use `if` statements, builders or properties to decide **what object to create**.
+```java
+@Bean
+TaxCalculator taxCalculator(@Value("${shoplite.tax.region:EU}") String region) {
+    return region.equals("US") ? new UsTaxCalculator() : new EuTaxCalculator();
+}
+```
+
+- **Dependencies of a `@Bean` method** are passed in as **method parameters**, and Spring injects them just like constructor parameters.
+
+- **Bean names**: a `@Component` bean is named after the **class** (`skuGenerator`), and a `@Bean` is named after the **method** (`clock`). I can override either one, for example `@Bean("utcClock")`.
+
+- **Same features for both**: scopes, `@Primary`, `@Lazy`, `@Profile` and lifecycle callbacks work on both. For `@Bean` I can also set `initMethod` and `destroyMethod` for library classes that have no annotations.
+
+**Follow-ups:**
+
+### Q: Can I use @Bean and @Component for the same class?
+- **Technically yes**, but then Spring creates **two beans of the same type**. Injecting by type then fails with **`NoUniqueBeanDefinitionException`**.
+
+- So pick **one way per class**: `@Component` for your own classes, and `@Bean` for everything else.
+
+---
+
+### Q: Why put @Bean methods in a @Configuration class and not a @Component?
+- In a **`@Configuration`** class, Spring makes sure that calling one `@Bean` method from another returns the **same singleton bean**, instead of creating a new object.
+
+- In a plain `@Component`, `@Bean` methods still work, but that call creates a **new object every time**. This is covered in detail in Core 13.
+
+---
+
+### Q: Which one does Spring Boot use for auto-configuration?
+- **`@Bean` methods.** Auto-configuration classes are `@Configuration` classes full of `@Bean` methods, usually guarded by conditions like **`@ConditionalOnMissingBean`**.
+
+- That's how Boot creates beans like `ObjectMapper` or `DataSource` only if **I haven't defined my own**.

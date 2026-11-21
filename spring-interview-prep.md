@@ -123,7 +123,7 @@ You don't need to do them separately — answering the questions in order covers
 
 **Configuration & annotations**
 - [x] **10.** How does @ComponentScan find beans?
-- [ ] ⭐ **11.** @Component vs @Service vs @Repository vs @Controller
+- [x] ⭐ **11.** @Component vs @Service vs @Repository vs @Controller
 - [ ] ⭐ **12.** @Bean vs @Component
 - [ ] **13.** @Configuration vs @Component with @Bean methods (proxyBeanMethods)
 - [ ] **14.** How does @Autowired resolve dependencies (type → qualifier → name)?
