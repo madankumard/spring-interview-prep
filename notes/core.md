@@ -100,7 +100,7 @@ new OrderService(fake).placeOrder("bob@shoplite.com", "Mouse");
 ### Q: What if two beans implement the same interface?
 - Spring injects **by type**, so with two candidates startup fails with **`NoUniqueBeanDefinitionException`**.
 
-- Fix it with **`@Primary`** on the default implementation, or **`@Qualifier("beanName")`** at the injection point (see Core 15). To get **all** of them, inject a `List<NotificationService>`.
+- Fix it with **`@Primary`** on the default implementation, or **`@Qualifier("beanName")`** at the injection point (see Core 14). To get **all** of them, inject a `List<NotificationService>`.
 
 ## Core 3 — What is a Spring bean? What does the IoC container do?
 
@@ -372,7 +372,7 @@ context.getBean(ShoppingCart.class) == context.getBean(ShoppingCart.class);   //
 
 - **Singletons are shared**, so they must **not keep per-user data in fields** (see Core 8).
 
-- **Prototype inside a singleton** is the main trap: it's injected **only once**, so it acts like a singleton. Fix it with **`ObjectProvider`** or **`@Lookup`** (see Core 20).
+- **Prototype inside a singleton** is the main trap: it's injected **only once**, so it acts like a singleton. Fix it with **`ObjectProvider`** or **`@Lookup`** (see Core 19).
 
 **Follow-ups:**
 
@@ -719,7 +719,7 @@ TaxCalculator taxCalculator(@Value("${shoplite.tax.region:EU}") String region) {
 ### Q: Why put @Bean methods in a @Configuration class and not a @Component?
 - In a **`@Configuration`** class, Spring makes sure that calling one `@Bean` method from another returns the **same singleton bean**, instead of creating a new object.
 
-- In a plain `@Component`, `@Bean` methods still work, but that call creates a **new object every time**. This is covered in detail in Core 13.
+- In a plain `@Component`, `@Bean` methods still work, but that call creates a **new object every time**.
 
 ---
 
@@ -727,3 +727,66 @@ TaxCalculator taxCalculator(@Value("${shoplite.tax.region:EU}") String region) {
 - **`@Bean` methods.** Auto-configuration classes are `@Configuration` classes full of `@Bean` methods, usually guarded by conditions like **`@ConditionalOnMissingBean`**.
 
 - That's how Boot creates beans like `ObjectMapper` or `DataSource` only if **I haven't defined my own**.
+
+## Core 13 — How does @Autowired resolve dependencies (type → qualifier → name)?
+
+**Answer:**
+- Spring first looks for beans by **type**. If exactly **one bean** matches the declared type, it's injected, and if **none** match, startup fails with **`NoSuchBeanDefinitionException`**.
+
+- If **several beans** match, Spring narrows them down in order. A **`@Qualifier`** at the injection point wins first, then a bean marked **`@Primary`**, and finally a bean whose **name matches the field or parameter name**.
+
+- If it still can't pick exactly one, startup fails with **`NoUniqueBeanDefinitionException`**. Both of these exceptions show up wrapped inside an **`UnsatisfiedDependencyException`**, which names the bean and parameter that failed, so the real reason is in the **`Caused by:`** line.
+
+- The same rules apply to constructor parameters, setters and fields, and with a **single constructor** I don't even need the `@Autowired` annotation.
+
+**Key points:**
+- **Step 1, by type**: Spring collects every bean that **is assignable to** the declared type, so an interface matches all of its implementations.
+```java
+public OrderService(NotificationService notificationService) { ... }
+// candidates: emailNotificationService, smsNotificationService
+```
+
+- **Step 2, `@Qualifier`**: it filters the candidates to the bean with that **name** (or a matching custom qualifier). It's the strongest rule because it's written right at the injection point.
+```java
+public OrderService(@Qualifier("smsNotificationService") NotificationService notifier) { ... }
+```
+
+- **Step 3, `@Primary`**: if candidates are still left, the one marked **`@Primary`** is the **default choice**. Spring 6.2 added the opposite, **`@Fallback`**, which marks a bean to use only when no other candidate is left.
+```java
+@Primary
+@Service
+public class EmailNotificationService implements NotificationService { ... }
+```
+
+- **Step 4, name match**: as a last resort, Spring matches the **parameter or field name** against the **bean names**. This only works for constructor parameters if the code is compiled with the **`-parameters`** flag, which the Spring Boot Maven parent turns on by default (Spring 6.1 stopped reading names from debug info).
+```java
+public OrderService(NotificationService emailNotificationService) { ... }  // picks the email bean
+```
+
+- **Injecting all matches**: when I want every implementation, I inject a **`List<T>`** (ordered by `@Order`) or a **`Map<String, T>`** keyed by bean name. Then no choosing happens at all.
+```java
+public NotificationDispatcher(Map<String, NotificationService> channels) { ... }
+```
+
+- **Optional dependencies**: if a bean might not exist, I use **`Optional<T>`** or **`ObjectProvider<T>`** instead of failing at startup. `@Autowired(required = false)` also works, but only for fields and setters.
+
+**Follow-ups:**
+
+### Q: Which wins: @Qualifier or @Primary?
+- **`@Qualifier` wins.** `@Primary` sets the **global default**, but a `@Qualifier` at a specific injection point **overrides** it for that one place.
+
+- The usual setup is `@Primary` on the common implementation and `@Qualifier` only where I need a different one.
+
+---
+
+### Q: How is @Autowired different from @Resource and @Inject?
+- **`@Inject`** (Jakarta) works like `@Autowired`: it resolves **by type first**, but it has no `required` attribute.
+
+- **`@Resource`** (Jakarta) resolves **by name first**, using the field name or its `name` attribute, and only falls back to type. It also can't be used on constructors.
+
+---
+
+### Q: Do I need @Autowired on a constructor?
+- **Not if the class has only one constructor.** Spring has used it automatically since **4.3**.
+
+- If there are **several constructors**, I put `@Autowired` on the one Spring should use.

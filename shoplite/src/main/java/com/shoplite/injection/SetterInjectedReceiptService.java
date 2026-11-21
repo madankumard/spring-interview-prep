@@ -4,6 +4,7 @@ import com.shoplite.notification.NotificationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,7 +19,7 @@ public class SetterInjectedReceiptService {
     }
 
     @Autowired
-    public void setNotificationService(NotificationService notificationService) {
+    public void setNotificationService(@Qualifier("emailNotificationService") NotificationService notificationService) {
         log.info("Setter: setNotificationService() called with {}", notificationService.getClass().getSimpleName());
         this.notificationService = notificationService;
     }

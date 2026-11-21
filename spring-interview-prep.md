@@ -28,13 +28,12 @@ You don't need to do them separately — answering the questions in order covers
 - [ ] Java 25, latest Spring Boot via start.spring.io (Web, JPA, Validation, PostgreSQL, Actuator, Testcontainers)
 - [ ] Docker Desktop running (needed for Postgres + Testcontainers)
 
-### Phase 1 — Spring Core playground (1–2 days) → Core Q1–25
+### Phase 1 — Spring Core playground (1–2 days) → Core Q1–23
 - [ ] Plain module (no web): `NotificationService` with Email/SMS implementations → DI, @Primary, @Qualifier
 - [ ] Break it on purpose: trigger NoUniqueBeanDefinitionException and NoSuchBeanDefinitionException, then fix
 - [ ] Log every lifecycle callback (constructor, @PostConstruct, BeanPostProcessor, @PreDestroy)
 - [ ] Singleton vs prototype demo; inject prototype into singleton, fix with ObjectProvider
 - [ ] Create a circular dependency, see Boot fail, fix it
-- [ ] @Configuration vs @Component with @Bean — prove proxyBeanMethods behaviour
 - [ ] @Profile("dev"/"prod") beans + @ConditionalOnProperty
 - [ ] Publish an event and handle it with @EventListener
 
@@ -124,21 +123,20 @@ You don't need to do them separately — answering the questions in order covers
 **Configuration & annotations**
 - [x] **10.** How does @ComponentScan find beans?
 - [x] ⭐ **11.** @Component vs @Service vs @Repository vs @Controller
-- [ ] ⭐ **12.** @Bean vs @Component
-- [ ] **13.** @Configuration vs @Component with @Bean methods (proxyBeanMethods)
-- [ ] **14.** How does @Autowired resolve dependencies (type → qualifier → name)?
-- [ ] ⭐ **15.** NoUniqueBeanDefinitionException — @Primary vs @Qualifier
-- [ ] **16.** NoSuchBeanDefinitionException — causes and fixes
-- [ ] **17.** @Value vs @ConfigurationProperties (incl. records)
-- [ ] **18.** @Profile and @Conditional (foundation of auto-configuration)
-- [ ] **19.** @Lazy — what and when
+- [x] ⭐ **12.** @Bean vs @Component
+- [x] **13.** How does @Autowired resolve dependencies (type → qualifier → name)?
+- [ ] ⭐ **14.** NoUniqueBeanDefinitionException — @Primary vs @Qualifier
+- [ ] **15.** NoSuchBeanDefinitionException — causes and fixes
+- [ ] **16.** @Value vs @ConfigurationProperties (incl. records)
+- [ ] **17.** @Profile and @Conditional (foundation of auto-configuration)
+- [ ] **18.** @Lazy — what and when
 
 **Advanced**
-- [ ] **20.** Prototype inside singleton (ObjectProvider, @Lookup)
-- [ ] ⭐ **21.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
-- [ ] **22.** BeanPostProcessor vs BeanFactoryPostProcessor
-- [ ] **23.** ApplicationEvent, @EventListener, @TransactionalEventListener
-- [ ] **24.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
+- [ ] **19.** Prototype inside singleton (ObjectProvider, @Lookup)
+- [ ] ⭐ **20.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
+- [ ] **21.** BeanPostProcessor vs BeanFactoryPostProcessor
+- [ ] **22.** ApplicationEvent, @EventListener, @TransactionalEventListener
+- [ ] **23.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
 
 ---
 

@@ -2,12 +2,14 @@ package com.shoplite.injection;
 
 import com.shoplite.notification.NotificationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
 public class FieldInjectedReceiptService {
 
     @Autowired
+    @Qualifier("emailNotificationService")
     private NotificationService notificationService;
 
     public void sendReceipt(String to, String orderId) {
