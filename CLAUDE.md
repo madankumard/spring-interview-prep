@@ -7,6 +7,9 @@ We go through the questions one by one. I type all project code myself.
 - Practice app: **ShopLite** (products, orders, inventory, customers).
 - Stack: Java 25, latest Spring Boot, PostgreSQL, Maven, Docker.
 - Base package: `com.shoplite`
+- Project location: `shoplite/` (Maven project inside this repo). You may **read** it
+  any time to fit code to what I've actually typed (packages, class names, config).
+  Never edit it.
 - Part 1 of `spring-interview-prep.md` describes how the app grows phase by phase.
   Fit code examples into the current state of the project.
 
@@ -32,6 +35,10 @@ The theory goes in the notes file; the chat is for doing.
    run, and right under it (indented "→ Expect:" line) what to look for (logs, output,
    HTTP response). Include an optional "break it" step when it teaches something.
 3. End with one line saying the notes were saved to `notes/<topic>.md`.
+
+**Chat stays minimal:** no answer, theory recap, or explanatory asides in chat. I read
+the theory in the notes file. Only add a short practical tip in chat when it helps the
+code or steps work (e.g. a gotcha, a Windows/IntelliJ quirk).
 
 If I ask a side question about a topic (not a new question ID), answer it in chat normally.
 
@@ -76,8 +83,19 @@ text goes in the notes file, not in the chat.
 
 ## Rules
 - You may create and edit `.md` files (`notes/`, `CLAUDE.md`, `README.md`,
-  `spring-interview-prep.md`). Never create or edit project code — show code in
-  the chat so I can type it.
+  `spring-interview-prep.md`). Never create or edit project code in `shoplite/` —
+  show code in the chat so I can type it.
+- Exception: for complicated topics later (e.g. microservices, security setups), I may
+  explicitly ask you to **create a sample project**. Only then, write it in a separate
+  folder (e.g. `samples/<topic>/`), never inside `shoplite/`. I'll replicate it myself
+  in ShopLite to learn, so keep it small, focused on the topic, and runnable.
+- **Flag it for me:** when I give a question ID, decide whether it fits as chat code in
+  ShopLite or needs a separate sample project. If it needs one, say so in **one line at
+  the top of the chat reply** with the reason (e.g. "needs 3 services + Kafka running"),
+  then still write the notes as usual. Don't build the sample until I say yes.
+  Rule of thumb: needs a sample = more than one running app, extra infrastructure
+  (Kafka, Keycloak, Eureka, Config Server, Zipkin), or more than ~8 new files to see it
+  work. Otherwise keep it as chat code in ShopLite.
 - When I say I'm done with a question (e.g. "done with Core 3"), tick it `[x]` in
   `spring-interview-prep.md` yourself. Don't tick anything I haven't said is done.
 - Don't quiz me or ask me questions back.

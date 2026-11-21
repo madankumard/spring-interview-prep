@@ -28,7 +28,7 @@ You don't need to do them separately — answering the questions in order covers
 - [ ] Java 25, latest Spring Boot via start.spring.io (Web, JPA, Validation, PostgreSQL, Actuator, Testcontainers)
 - [ ] Docker Desktop running (needed for Postgres + Testcontainers)
 
-### Phase 1 — Spring Core playground (1–2 days) → Core Q1–23
+### Phase 1 — Spring Core playground (1–2 days) → Core Q1–21
 - [ ] Plain module (no web): `NotificationService` with Email/SMS implementations → DI, @Primary, @Qualifier
 - [ ] Break it on purpose: trigger NoUniqueBeanDefinitionException and NoSuchBeanDefinitionException, then fix
 - [ ] Log every lifecycle callback (constructor, @PostConstruct, BeanPostProcessor, @PreDestroy)
@@ -124,19 +124,17 @@ You don't need to do them separately — answering the questions in order covers
 - [x] **10.** How does @ComponentScan find beans?
 - [x] ⭐ **11.** @Component vs @Service vs @Repository vs @Controller
 - [x] ⭐ **12.** @Bean vs @Component
-- [x] **13.** How does @Autowired resolve dependencies (type → qualifier → name)?
-- [ ] ⭐ **14.** NoUniqueBeanDefinitionException — @Primary vs @Qualifier
-- [ ] **15.** NoSuchBeanDefinitionException — causes and fixes
-- [ ] **16.** @Value vs @ConfigurationProperties (incl. records)
-- [ ] **17.** @Profile and @Conditional (foundation of auto-configuration)
-- [ ] **18.** @Lazy — what and when
+- [x] ⭐ **13.** How does @Autowired resolve dependencies (type → qualifier → name)?
+- [ ] **14.** @Value vs @ConfigurationProperties (incl. records)
+- [ ] **15.** @Profile and @Conditional (foundation of auto-configuration)
+- [ ] **16.** @Lazy — what and when
 
 **Advanced**
-- [ ] **19.** Prototype inside singleton (ObjectProvider, @Lookup)
-- [ ] ⭐ **20.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
-- [ ] **21.** BeanPostProcessor vs BeanFactoryPostProcessor
-- [ ] **22.** ApplicationEvent, @EventListener, @TransactionalEventListener
-- [ ] **23.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
+- [ ] **17.** Prototype inside singleton (ObjectProvider, @Lookup)
+- [ ] ⭐ **18.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
+- [ ] **19.** BeanPostProcessor vs BeanFactoryPostProcessor
+- [ ] **20.** ApplicationEvent, @EventListener, @TransactionalEventListener
+- [ ] **21.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
 
 ---
 

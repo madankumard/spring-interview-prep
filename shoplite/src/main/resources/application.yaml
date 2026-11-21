@@ -5,3 +5,10 @@ spring:
 shoplite:
   tax:
     region: US
+  orders:
+    max-items-per-order: 20
+    free-shipping-threshold: 50.00
+    allowed-countries:
+      - IN
+      - DE
+      - US

@@ -100,7 +100,7 @@ new OrderService(fake).placeOrder("bob@shoplite.com", "Mouse");
 ### Q: What if two beans implement the same interface?
 - Spring injects **by type**, so with two candidates startup fails with **`NoUniqueBeanDefinitionException`**.
 
-- Fix it with **`@Primary`** on the default implementation, or **`@Qualifier("beanName")`** at the injection point (see Core 14). To get **all** of them, inject a `List<NotificationService>`.
+- Fix it with **`@Primary`** on the default implementation, or **`@Qualifier("beanName")`** at the injection point (see Core 13). To get **all** of them, inject a `List<NotificationService>`.
 
 ## Core 3 — What is a Spring bean? What does the IoC container do?
 
@@ -372,7 +372,7 @@ context.getBean(ShoppingCart.class) == context.getBean(ShoppingCart.class);   //
 
 - **Singletons are shared**, so they must **not keep per-user data in fields** (see Core 8).
 
-- **Prototype inside a singleton** is the main trap: it's injected **only once**, so it acts like a singleton. Fix it with **`ObjectProvider`** or **`@Lookup`** (see Core 19).
+- **Prototype inside a singleton** is the main trap: it's injected **only once**, so it acts like a singleton. Fix it with **`ObjectProvider`** or **`@Lookup`** (see Core 17).
 
 **Follow-ups:**
 
@@ -790,3 +790,74 @@ public NotificationDispatcher(Map<String, NotificationService> channels) { ... }
 - **Not if the class has only one constructor.** Spring has used it automatically since **4.3**.
 
 - If there are **several constructors**, I put `@Autowired` on the one Spring should use.
+
+---
+
+### Q: What are the common causes of NoSuchBeanDefinitionException?
+- The class is **outside the component-scan packages** (not under the `@SpringBootApplication` package), or it's **missing a stereotype annotation** like `@Service`.
+
+- The bean exists only under a **`@Profile` or condition** that isn't active, or a **`@Qualifier` name doesn't match** any bean. If the dependency is genuinely optional, I inject it as `Optional<T>` or `ObjectProvider<T>`.
+
+## Core 14 — @Value vs @ConfigurationProperties (incl. records)
+
+**Answer:**
+- Both read values from **configuration** like `application.yaml`, environment variables or command-line arguments. **`@Value`** injects **one property** at a time using a placeholder like `${shoplite.tax.region}`. **`@ConfigurationProperties`** binds a **whole group of properties** under a prefix into one **type-safe object**.
+
+- I use **`@Value`** for a **single, simple value** in one place, or when I need a **SpEL expression** (Spring Expression Language, written as `#{...}`). For anything with **several related settings**, I use **`@ConfigurationProperties`**, because the settings live in one class, are **validated at startup**, and can be injected anywhere like any other bean.
+
+- In modern Spring Boot, the cleanest form is a **Java record** annotated with `@ConfigurationProperties`. It's **immutable**, Boot binds it through the **constructor** automatically, and since Boot 3 I no longer need `@ConstructorBinding` for that.
+
+**Key points:**
+- **`@Value`, one property**: a `${...}` placeholder with an optional **default after the colon**. Without a default, a missing property **fails startup** with *"Could not resolve placeholder"*.
+```java
+TaxCalculator taxCalculator(@Value("${shoplite.tax.region:EU}") String region) { ... }
+```
+
+- **`@ConfigurationProperties` as a record**: the prefix maps to the record, and each **component** (record field) maps to one key. **`@DefaultValue`** gives a fallback when the key is missing.
+```java
+@ConfigurationProperties("shoplite.orders")
+public record OrderProperties(
+        int maxItemsPerOrder,
+        BigDecimal freeShippingThreshold,
+        @DefaultValue("30s") Duration paymentTimeout,
+        List<String> allowedCountries) { }
+```
+
+- **Registering it**: put **`@ConfigurationPropertiesScan`** on the main class, or `@EnableConfigurationProperties(OrderProperties.class)` on a config class. After that I inject it like any bean.
+```java
+@SpringBootApplication
+@ConfigurationPropertiesScan
+public class ShopliteApplication { ... }
+```
+
+- **Validation at startup**: add **`@Validated`** and Bean Validation constraints like `@Min` or `@NotEmpty`. A bad value then **stops the app at startup** with a clear message, instead of failing later at runtime.
+```java
+@Validated
+@ConfigurationProperties("shoplite.orders")
+public record OrderProperties(@Min(1) int maxItemsPerOrder, @NotEmpty List<String> allowedCountries) { }
+```
+
+- **Relaxed binding**: `@ConfigurationProperties` matches keys loosely. So `max-items-per-order` in YAML, `maxItemsPerOrder`, and the env variable **`SHOPLITE_ORDERS_MAXITEMSPERORDER`** all bind to the same field. `@Value` is much stricter, so I should always use the exact kebab-case name there.
+
+- **Type conversion**: both convert strings to types like `int`, `BigDecimal` and `List`. `@ConfigurationProperties` also understands values like **`30s`** for `Duration` and **`10MB`** for `DataSize`.
+
+**Follow-ups:**
+
+### Q: Why prefer @ConfigurationProperties over many @Value fields?
+- Everything for one feature is in **one typed class**, so there are no repeated **string keys** scattered across the code. Typos in a key fail silently with defaults, or fail late without them.
+
+- It also gives **validation**, **relaxed binding**, IDE **autocompletion** (with `spring-boot-configuration-processor`), and it's easy to **create in unit tests** with `new OrderProperties(...)`.
+
+---
+
+### Q: Can @ConfigurationProperties use SpEL?
+- **No.** SpEL like `#{2 * 10}` or `#{@someBean.value}` only works in **`@Value`**.
+
+- That's the main reason to still use `@Value`: computed or bean-dependent values.
+
+---
+
+### Q: Where do the values come from, and which source wins?
+- Spring reads many **property sources** and the more specific one wins. **Command-line arguments** beat **environment variables**, which beat **profile-specific files** like `application-dev.yaml`, which beat plain `application.yaml`.
+
+- This is why I can keep defaults in the YAML and **override them per environment** with an env variable, without changing code.
