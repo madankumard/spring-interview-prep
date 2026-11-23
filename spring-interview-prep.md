@@ -28,14 +28,13 @@ You don't need to do them separately — answering the questions in order covers
 - [ ] Java 25, latest Spring Boot via start.spring.io (Web, JPA, Validation, PostgreSQL, Actuator, Testcontainers)
 - [ ] Docker Desktop running (needed for Postgres + Testcontainers)
 
-### Phase 1 — Spring Core playground (1–2 days) → Core Q1–21
+### Phase 1 — Spring Core playground (1–2 days) → Core Q1–19
 - [ ] Plain module (no web): `NotificationService` with Email/SMS implementations → DI, @Primary, @Qualifier
 - [ ] Break it on purpose: trigger NoUniqueBeanDefinitionException and NoSuchBeanDefinitionException, then fix
 - [ ] Log every lifecycle callback (constructor, @PostConstruct, BeanPostProcessor, @PreDestroy)
 - [ ] Singleton vs prototype demo; inject prototype into singleton, fix with ObjectProvider
 - [ ] Create a circular dependency, see Boot fail, fix it
 - [ ] @Profile("dev"/"prod") beans + @ConditionalOnProperty
-- [ ] Publish an event and handle it with @EventListener
 
 ### Phase 2 — Boot + REST API (3–4 days) → Boot + REST sections
 - [ ] Product & Order CRUD with @RestController, DTOs (records), ResponseEntity, 201 + Location
@@ -59,6 +58,7 @@ You don't need to do them separately — answering the questions in order covers
 - [ ] @Version optimistic locking on inventory; simulate two concurrent updates
 - [ ] Transaction propagation demo: REQUIRED vs REQUIRES_NEW (audit log that survives rollback)
 - [ ] Self-invocation bug with @Transactional — reproduce and fix
+- [ ] Publish an OrderPlaced event: @EventListener vs @TransactionalEventListener(AFTER_COMMIT)
 - [ ] Auditing (@CreatedDate, @LastModifiedBy)
 - [ ] Batch insert 10k rows: compare IDENTITY vs SEQUENCE
 
@@ -130,11 +130,9 @@ You don't need to do them separately — answering the questions in order covers
 - [x] **16.** @Lazy — what and when
 
 **Advanced**
-- [ ] **17.** Prototype inside singleton (ObjectProvider, @Lookup)
+- [x] **17.** Prototype inside singleton (ObjectProvider)
 - [ ] ⭐ **18.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
-- [ ] **19.** BeanPostProcessor vs BeanFactoryPostProcessor
-- [ ] **20.** ApplicationEvent, @EventListener, @TransactionalEventListener
-- [ ] **21.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
+- [ ] **19.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
 
 ---
 
@@ -275,12 +273,13 @@ You don't need to do them separately — answering the questions in order covers
 - [ ] **27.** Isolation levels and anomalies
 - [ ] **28.** What readOnly = true really does
 - [ ] ⭐ **29.** Optimistic (@Version) vs pessimistic locking
+- [ ] **30.** ApplicationEvent, @EventListener, @TransactionalEventListener (run after commit)
 
 **Production & testing**
-- [ ] **30.** HikariCP connection pooling
-- [ ] **31.** Flyway / Liquibase vs ddl-auto
-- [ ] **32.** @DataJpaTest with Testcontainers instead of H2
-- [ ] **33.** Soft delete (Hibernate @SoftDelete)
+- [ ] **31.** HikariCP connection pooling
+- [ ] **32.** Flyway / Liquibase vs ddl-auto
+- [ ] **33.** @DataJpaTest with Testcontainers instead of H2
+- [ ] **34.** Soft delete (Hibernate @SoftDelete)
 
 ---
 

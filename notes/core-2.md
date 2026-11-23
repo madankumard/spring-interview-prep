@@ -43,3 +43,37 @@ public ReportService(@Lazy SalesReportGenerator generator) {
 - **No.** A lazy singleton is still created **only once**, just later.
 
 - A **prototype** bean is created **every time** it's requested. `@Lazy` changes **when** the bean is created, not **how many** are created.
+
+## Core 17 — Prototype inside singleton (ObjectProvider)
+
+**Answer:**
+- When a **prototype** bean is injected into a **singleton**, it's injected **only once**, when the singleton is created. So the singleton keeps using the **same prototype instance** forever, and the prototype scope is effectively lost.
+
+- The fix is to **ask the container for a new instance each time** I need one, instead of injecting it once. The modern way is to inject an **`ObjectProvider<T>`** and call **`getObject()`** whenever I need a fresh bean.
+
+- This is better than injecting the whole **`ApplicationContext`** and calling `getBean()` myself. `ObjectProvider` asks only for the one bean I need, so the dependency stays **clear** and is easy to **mock in tests**.
+
+**Key points:**
+- **The problem**: the cart is created once, so every customer shares **the same cart**.
+```java
+@Service
+public class CheckoutService {
+    private final ShoppingCart cart;   // prototype, but injected only once
+}
+```
+
+- **`ObjectProvider<T>`**: a small **factory handle** that Spring injects. Each **`getObject()`** call asks the container for the bean, so a prototype gives a **new instance** every time.
+```java
+public CheckoutService(ObjectProvider<ShoppingCart> cartProvider) { ... }
+
+ShoppingCart cart = cartProvider.getObject();   // new cart on every call
+```
+
+- **Scoped proxy, a trap**: `@Scope(value = "prototype", proxyMode = ScopedProxyMode.TARGET_CLASS)` injects a proxy instead. But for a prototype, **every method call** on the proxy creates a **new instance**, so `cart.add()` and `cart.getItems()` hit different carts. It fits request and session scopes much better than prototype.
+
+**Follow-ups:**
+
+### Q: What else can ObjectProvider do?
+- It handles **optional** beans with **`getIfAvailable()`**, which returns `null` instead of failing when the bean doesn't exist.
+
+- It also handles **multiple** beans with **`getIfUnique()`** and **`stream()`**, which goes through all matching beans.

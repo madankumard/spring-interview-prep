@@ -29,7 +29,7 @@ class ScopeDemo implements CommandLineRunner {
         ShoppingCart c2 = context.getBean(ShoppingCart.class);
         log.info("Prototype: cart ids {} and {}, same instance: {}", c1.getId(), c2.getId(), c1 == c2);
 
-        log.info("Pitfall: {}", checkoutService.addItem("alice", "Keyboard"));
-        log.info("Pitfall: {}", checkoutService.addItem("bob", "Mouse"));
+        log.info("ObjectProvider: {}", checkoutService.addItem("alice", "Keyboard"));
+        log.info("ObjectProvider: {}", checkoutService.addItem("bob", "Mouse"));
     }
 }
