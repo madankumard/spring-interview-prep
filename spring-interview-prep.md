@@ -131,7 +131,7 @@ You don't need to do them separately — answering the questions in order covers
 
 **Advanced**
 - [x] **17.** Prototype inside singleton (ObjectProvider)
-- [ ] ⭐ **18.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
+- [x] ⭐ **18.** Circular dependencies — resolution, constructor injection failure, Boot 2.6+ behaviour
 - [ ] **19.** Design patterns in Spring (Singleton, Factory, Proxy, Template, Observer)
 
 ---
