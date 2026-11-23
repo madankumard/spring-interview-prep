@@ -1,0 +1,6 @@
+shoplite:
+  orders:
+    max-items-per-order: 5
+  features:
+    loyalty:
+      enabled: true

@@ -861,3 +861,58 @@ public record OrderProperties(@Min(1) int maxItemsPerOrder, @NotEmpty List<Strin
 - Spring reads many **property sources** and the more specific one wins. **Command-line arguments** beat **environment variables**, which beat **profile-specific files** like `application-dev.yaml`, which beat plain `application.yaml`.
 
 - This is why I can keep defaults in the YAML and **override them per environment** with an env variable, without changing code.
+
+## Core 15 — @Profile and @Conditional (foundation of auto-configuration)
+
+**Answer:**
+- Both decide **whether a bean is created or skipped** when the app starts. If the check fails, Spring just ignores that bean.
+
+- **`@Profile`** creates a bean only when a certain **profile** is active. A profile is just a name for an environment, like **`dev`** or **`prod`**, so I can use a fake payment gateway in dev and the real one in prod.
+
+- **`@Conditional`** is the more general version: the bean is created only if a **condition** is true, like a property being set. Spring Boot's **auto-configuration** works this way, creating beans only when they're needed.
+
+**Key points:**
+- **`@Profile` on a bean**: the bean exists only in that profile. **`!prod`** means "every profile except prod", so it also works when no profile is set.
+```java
+@Service
+@Profile("!prod")
+public class FakePaymentGateway implements PaymentGateway { ... }
+
+@Service
+@Profile("prod")
+public class CardPaymentGateway implements PaymentGateway { ... }
+```
+
+- **Turning a profile on**: I set **`spring.profiles.active=prod`**, for example as a command-line argument or the env variable `SPRING_PROFILES_ACTIVE`.
+
+- **Profile config files**: **`application-prod.yaml`** is loaded only when `prod` is active, and its values **override** the ones in `application.yaml`.
+
+- **`@ConditionalOnProperty`**: creates the bean only if a property has a certain value. It's an easy way to build a **feature flag**, a setting that turns a feature on or off.
+```java
+@Service
+@ConditionalOnProperty(name = "shoplite.features.loyalty.enabled", havingValue = "true")
+public class LoyaltyPointsService { ... }
+```
+
+- **`@ConditionalOnBooleanProperty`** (new in Boot 3.5): a shorter way to write the same thing when the property is just **true or false**. The bean is created when the property is `true`.
+```java
+@Service
+@ConditionalOnBooleanProperty("shoplite.features.loyalty.enabled")
+public class LoyaltyPointsService { ... }
+```
+
+- **Custom condition**: I can write my own by implementing **`Condition`** and returning true or false from `matches()`.
+```java
+public class OnWindowsCondition implements Condition {
+    public boolean matches(ConditionContext ctx, AnnotatedTypeMetadata md) {
+        return ctx.getEnvironment().getProperty("os.name", "").startsWith("Windows");
+    }
+}
+```
+
+**Follow-ups:**
+
+### Q: When do I use @Profile vs @ConditionalOnProperty?
+- I use **`@Profile`** for things that change **per environment**, like dev vs prod.
+
+- I use **`@ConditionalOnProperty`** to turn **one feature** on or off, in any environment.

@@ -125,7 +125,7 @@ You don't need to do them separately — answering the questions in order covers
 - [x] ⭐ **11.** @Component vs @Service vs @Repository vs @Controller
 - [x] ⭐ **12.** @Bean vs @Component
 - [x] ⭐ **13.** How does @Autowired resolve dependencies (type → qualifier → name)?
-- [ ] **14.** @Value vs @ConfigurationProperties (incl. records)
+- [x] **14.** @Value vs @ConfigurationProperties (incl. records)
 - [ ] **15.** @Profile and @Conditional (foundation of auto-configuration)
 - [ ] **16.** @Lazy — what and when
 

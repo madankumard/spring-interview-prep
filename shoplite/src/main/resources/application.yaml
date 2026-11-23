@@ -12,3 +12,6 @@ shoplite:
       - IN
       - DE
       - US
+  features:
+    loyalty:
+      enabled: false

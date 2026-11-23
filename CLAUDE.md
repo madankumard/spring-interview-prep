@@ -30,7 +30,10 @@ The theory goes in the notes file; the chat is for doing.
 
 **Show in chat only:**
 1. **Code** — the complete code to type for ShopLite: file path, package, imports.
-   One line before each file saying what it demonstrates.
+   One line before each file saying what it demonstrates. After every file's code
+   block (before the next file, and before Steps & Verify) put this long separator line
+   on its own, so files are easy to tell apart in the terminal (`---` renders too short):
+   `════════════════════════════════════════════════════════════════════════`
 2. **Steps & Verify** — one numbered list: each step says what to create, change or
    run, and right under it (indented "→ Expect:" line) what to look for (logs, output,
    HTTP response). Include an optional "break it" step when it teaches something.
