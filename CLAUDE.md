@@ -48,7 +48,10 @@ If I ask a side question about a topic (not a new question ID), answer it in cha
 ## Notes files
 After each answer, append it to `notes/<topic>.md`:
 core.md, boot.md, rest.md, jpa.md, aop.md, security.md, microservices.md, cloud.md, testing.md.
-Create the file if it doesn't exist. Use this format:
+Create the file if it doesn't exist.
+- `core.md` holds Core 1–15 and is closed. **Core 16 onwards goes in `core-2.md`.**
+- When a notes file gets long (~900 lines), I may ask to start a `<topic>-2.md`;
+  after that, append new questions to the newest part only. Use this format:
 
 ```
 ## <ID> — <question>

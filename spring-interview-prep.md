@@ -126,8 +126,8 @@ You don't need to do them separately — answering the questions in order covers
 - [x] ⭐ **12.** @Bean vs @Component
 - [x] ⭐ **13.** How does @Autowired resolve dependencies (type → qualifier → name)?
 - [x] **14.** @Value vs @ConfigurationProperties (incl. records)
-- [ ] **15.** @Profile and @Conditional (foundation of auto-configuration)
-- [ ] **16.** @Lazy — what and when
+- [x] **15.** @Profile and @Conditional (foundation of auto-configuration)
+- [x] **16.** @Lazy — what and when
 
 **Advanced**
 - [ ] **17.** Prototype inside singleton (ObjectProvider, @Lookup)
