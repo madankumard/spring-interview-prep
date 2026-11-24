@@ -139,48 +139,33 @@ You don't need to do them separately — answering the questions in order covers
 ### 2. Spring Boot (ID: Boot)
 
 **Must-know**
-- [ ] **1.** What is Spring Boot and how is it different from plain Spring?
-- [ ] ⭐ **2.** What happens step by step in SpringApplication.run()?
+- [x] **1.** What is Spring Boot and how is it different from plain Spring?
+- [x] ⭐ **2.** What happens step by step in SpringApplication.run()?
 - [ ] ⭐ **3.** What @SpringBootApplication combines and what each part does
 - [ ] **4.** Starters and dependency version management (BOM / parent POM)
 - [ ] ⭐ **5.** How auto-configuration works (AutoConfiguration.imports, @Conditional*)
 - [ ] ⭐ **6.** Overriding auto-configured beans (@ConditionalOnMissingBean) and excluding auto-configs
-- [ ] **7.** Embedded servers — swap Tomcat for Jetty/Undertow, change port, disable web server
-- [ ] **8.** @RestController vs @Controller
+- [ ] **7.** Embedded servers — swap Tomcat for Jetty (Undertow dropped in Boot 4), change port, disable web server
 
 **Configuration**
-- [ ] ⭐ **9.** Externalized config precedence (properties, YAML, env vars, CLI args)
-- [ ] **10.** @ConfigurationProperties — binding, @Validated, records
-- [ ] **11.** Profiles — activation, profile-specific files, @Profile, profile groups
-- [ ] **12.** spring.config.import and loading external config/secrets
-
-**Web & data**
-- [ ] ⭐ **13.** Global exception handling (@ControllerAdvice) + ProblemDetail (RFC 9457)
-- [ ] **14.** Request validation with @Valid / Bean Validation
-- [ ] **15.** How Boot configures DataSource + JPA (Hibernate default, HikariCP)
-- [ ] **16.** spring.jpa.open-in-view — why Boot warns about it
-- [ ] **17.** @Transactional behaviour in Boot apps
-
-**Testing**
-- [ ] ⭐ **18.** @SpringBootTest vs slices (@WebMvcTest, @DataJpaTest)
-- [ ] **19.** @MockitoBean vs @MockBean (deprecated)
-- [ ] **20.** Testcontainers with @ServiceConnection
+- [ ] ⭐ **8.** Externalized config precedence (properties, YAML, env vars, CLI args) — short: precedence order only
+- [ ] **9.** spring.config.import and loading external config/secrets
 
 **Production readiness**
-- [ ] ⭐ **21.** Actuator — key endpoints, exposing, securing
-- [ ] ⭐ **22.** Liveness and readiness probes for Kubernetes
-- [ ] ⭐ **23.** Observability with Micrometer — metrics, tracing, trace IDs in logs
-- [ ] **24.** Logging — runtime level changes, log groups, Logback
-- [ ] **25.** Graceful shutdown
-- [ ] **26.** CommandLineRunner vs ApplicationRunner
+- [ ] ⭐ **10.** Actuator — key endpoints, exposing, securing
+- [ ] ⭐ **11.** Liveness and readiness probes for Kubernetes
+- [ ] ⭐ **12.** Observability with Micrometer — metrics, tracing, trace IDs in logs
+- [ ] **13.** Logging — runtime level changes, log groups, Logback
+- [ ] **14.** Graceful shutdown
+- [ ] **15.** CommandLineRunner vs ApplicationRunner
 
 **Modern Boot (3+/4)**
-- [ ] **27.** Boot 2 → 3 migration (Jakarta, Java 17, breaking changes)
-- [ ] **28.** GraalVM native images and AOT
-- [ ] **29.** Virtual threads
-- [ ] **30.** Executable JAR internals, layered jars, Buildpacks
-- [ ] **31.** Docker Compose support in development
-- [ ] **32.** DevTools — what it does, why it's off in production
+- [ ] **16.** Boot 2 → 3 migration (Jakarta, Java 17, breaking changes)
+- [ ] **17.** GraalVM native images and AOT
+- [ ] **18.** Virtual threads
+- [ ] **19.** Executable JAR internals, layered jars, Buildpacks
+- [ ] **20.** Docker Compose support in development
+- [ ] **21.** DevTools — what it does, why it's off in production
 
 ---
 

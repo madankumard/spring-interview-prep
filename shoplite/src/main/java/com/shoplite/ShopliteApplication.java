@@ -1,5 +1,6 @@
 package com.shoplite;
 
+import com.shoplite.config.StartupEventLogger;
 import com.shoplite.order.OrderService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -12,11 +13,16 @@ import org.springframework.context.annotation.Bean;
 public class ShopliteApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(ShopliteApplication.class, args);
+		SpringApplication app =new SpringApplication(ShopliteApplication.class);
+		app.addListeners(new StartupEventLogger());
+		app.run(args);
 	}
 
 	@Bean
 	CommandLineRunner demo(OrderService  orderService) {
-		return args -> orderService.placeOrder("alice@soplite.com","keyboard");
+		return args -> {
+			System.out.println("### RUNNER: CommandLineRunner running");
+			orderService.placeOrder("alice@soplite.com","keyboard");
+		};
 	}
 }
