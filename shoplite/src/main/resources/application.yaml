@@ -15,3 +15,5 @@ shoplite:
   features:
     loyalty:
       enabled: false
+  store:
+    name: ShopLite (application.yaml)

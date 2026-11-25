@@ -141,31 +141,29 @@ You don't need to do them separately — answering the questions in order covers
 **Must-know**
 - [x] **1.** What is Spring Boot and how is it different from plain Spring?
 - [x] ⭐ **2.** What happens step by step in SpringApplication.run()?
-- [ ] ⭐ **3.** What @SpringBootApplication combines and what each part does
-- [ ] **4.** Starters and dependency version management (BOM / parent POM)
-- [ ] ⭐ **5.** How auto-configuration works (AutoConfiguration.imports, @Conditional*)
-- [ ] ⭐ **6.** Overriding auto-configured beans (@ConditionalOnMissingBean) and excluding auto-configs
-- [ ] **7.** Embedded servers — swap Tomcat for Jetty (Undertow dropped in Boot 4), change port, disable web server
+- [x] ⭐ **3.** What @SpringBootApplication combines and what each part does
+- [x] ⭐ **4.** How auto-configuration works (AutoConfiguration.imports, @Conditional*)
+- [x] **5.** Embedded servers — swap Tomcat for Jetty (Undertow dropped in Boot 4), change port, disable web server
 
 **Configuration**
-- [ ] ⭐ **8.** Externalized config precedence (properties, YAML, env vars, CLI args) — short: precedence order only
-- [ ] **9.** spring.config.import and loading external config/secrets
+- [x] ⭐ **6.** Externalized config precedence (properties, YAML, env vars, CLI args) — short: precedence order only
+- [ ] **7.** spring.config.import and loading external config/secrets
 
 **Production readiness**
-- [ ] ⭐ **10.** Actuator — key endpoints, exposing, securing
-- [ ] ⭐ **11.** Liveness and readiness probes for Kubernetes
-- [ ] ⭐ **12.** Observability with Micrometer — metrics, tracing, trace IDs in logs
-- [ ] **13.** Logging — runtime level changes, log groups, Logback
-- [ ] **14.** Graceful shutdown
-- [ ] **15.** CommandLineRunner vs ApplicationRunner
+- [ ] ⭐ **8.** Actuator — key endpoints, exposing, securing
+- [ ] ⭐ **9.** Liveness and readiness probes for Kubernetes
+- [ ] ⭐ **10.** Observability with Micrometer — metrics, tracing, trace IDs in logs
+- [ ] **11.** Logging — runtime level changes, log groups, Logback
+- [ ] **12.** Graceful shutdown
+- [ ] **13.** CommandLineRunner vs ApplicationRunner
 
 **Modern Boot (3+/4)**
-- [ ] **16.** Boot 2 → 3 migration (Jakarta, Java 17, breaking changes)
-- [ ] **17.** GraalVM native images and AOT
-- [ ] **18.** Virtual threads
-- [ ] **19.** Executable JAR internals, layered jars, Buildpacks
-- [ ] **20.** Docker Compose support in development
-- [ ] **21.** DevTools — what it does, why it's off in production
+- [ ] **14.** Boot 2 → 3 migration (Jakarta, Java 17, breaking changes)
+- [ ] **15.** GraalVM native images and AOT
+- [ ] **16.** Virtual threads
+- [ ] **17.** Executable JAR internals, layered jars, Buildpacks
+- [ ] **18.** Docker Compose support in development
+- [ ] **19.** DevTools — what it does, why it's off in production
 
 ---
 

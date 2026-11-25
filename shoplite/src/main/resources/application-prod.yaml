@@ -4,3 +4,5 @@ shoplite:
   features:
     loyalty:
       enabled: true
+  store:
+    name: ShopLite (application.yaml)
