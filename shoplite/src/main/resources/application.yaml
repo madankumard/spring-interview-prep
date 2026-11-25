@@ -1,6 +1,10 @@
 spring:
   application:
     name: shoplite
+  config:
+    import:
+      - optional:file:./secrets/payment.yaml
+      - optional:configtree:./secrets/tree/
 
 shoplite:
   tax:

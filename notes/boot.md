@@ -269,3 +269,58 @@ WebServerFactoryCustomizer<ConfigurableWebServerFactory> portCustomizer() {
 
 ### Q: How do you check which source a property actually came from?
 - The Actuator **`/actuator/env`** endpoint lists every property source **in precedence order** and shows which one supplied each value. Values that look secret are masked.
+
+## Boot 7 — spring.config.import and loading external config/secrets
+
+**Answer:**
+- **`spring.config.import`** lets one config file **pull in more config** from somewhere else, like another file, a folder of secrets, or a config server. I write it in `application.yaml`, and Boot loads the imported sources as if they were part of that file.
+
+- It's mainly used to keep **secrets out of the jar and out of Git**. The packaged `application.yaml` only says **where** to load secrets from, and the actual passwords and API keys live outside, on the server or in Kubernetes.
+
+- Imported values **override** the values in the file that imports them. A missing import **fails startup**, unless I prefix it with **`optional:`**.
+
+**Key points:**
+- **Importing a file**: the path is relative to the **working directory**. Several imports can be listed, and `optional:` means "fine if it's not there", which is handy in development.
+```yaml
+spring:
+  config:
+    import:
+      - optional:file:./secrets/payment.yaml
+```
+
+- **Config trees for Kubernetes and Docker secrets**: secrets are usually **mounted as files**, one file per value. With **`configtree:`**, each **file name becomes the property name** and the file content becomes the value, so a file `/run/secrets/shoplite.payment.webhook-secret` sets `shoplite.payment.webhook-secret`.
+```yaml
+spring:
+  config:
+    import: optional:configtree:/run/secrets/
+```
+
+- **Placeholders for environment variables**: another common way is to refer to an env var with a **default for development**. The secret then comes from the deployment platform, and nothing sensitive is in the file.
+```yaml
+shoplite:
+  payment:
+    api-key: ${PAYMENT_API_KEY:dev-key}
+```
+
+- **Other import types**: Spring Cloud adds **`configserver:`** for Spring Cloud Config and **`vault:`** for HashiCorp Vault. It's the same `spring.config.import` mechanism, so the app code doesn't change.
+
+- **What changed**: `spring.config.import` arrived in **Boot 2.4** and replaced the old **`bootstrap.yml`** approach for Spring Cloud Config. Using `bootstrap.yml` is now the outdated answer.
+
+**Follow-ups:**
+
+### Q: How do you keep secrets out of Git?
+- I **never put real secrets** in `application.yaml`. The file only has **placeholders** or **imports**, and the real values come from **environment variables, mounted secret files or a vault**.
+
+- Local secret files, like `secrets/`, go in **`.gitignore`**.
+
+---
+
+### Q: What happens if an imported file is missing?
+- Without `optional:`, startup **fails** with a `ConfigDataResourceNotFoundException`. That's good for production, where a missing secrets file is a real problem.
+
+- With **`optional:`**, Boot **skips it silently**, which suits local development, where the file may not exist.
+
+---
+
+### Q: Why is configtree better than environment variables for secrets?
+- Env vars can **leak** through process listings, crash dumps or logs that print the environment. **Mounted files** are only readable by the app and can be **rotated** by Kubernetes without rebuilding the image.

@@ -99,9 +99,7 @@ You don't need to do them separately — answering the questions in order covers
 - [ ] Contract test between order-service and inventory-service
 
 ### Phase 8 — Modern extras (optional, 1–2 days)
-- [ ] GraalVM native image of one service; note what broke
-- [ ] Buildpacks image (`bootBuildImage`), layered jars
-- [ ] Boot 2 → 3 migration notes (javax → jakarta)
+- [ ] Buildpacks image (`mvnw spring-boot:build-image`), layered jars
 
 ---
 
@@ -158,12 +156,10 @@ You don't need to do them separately — answering the questions in order covers
 - [ ] **13.** CommandLineRunner vs ApplicationRunner
 
 **Modern Boot (3+/4)**
-- [ ] **14.** Boot 2 → 3 migration (Jakarta, Java 17, breaking changes)
-- [ ] **15.** GraalVM native images and AOT
-- [ ] **16.** Virtual threads
-- [ ] **17.** Executable JAR internals, layered jars, Buildpacks
-- [ ] **18.** Docker Compose support in development
-- [ ] **19.** DevTools — what it does, why it's off in production
+- [ ] **14.** Virtual threads
+- [ ] **15.** Executable JAR internals, layered jars, Buildpacks
+- [ ] **16.** Docker Compose support in development
+- [ ] **17.** DevTools — what it does, why it's off in production
 
 ---
 
