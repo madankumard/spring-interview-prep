@@ -324,3 +324,76 @@ shoplite:
 
 ### Q: Why is configtree better than environment variables for secrets?
 - Env vars can **leak** through process listings, crash dumps or logs that print the environment. **Mounted files** are only readable by the app and can be **rotated** by Kubernetes without rebuilding the image.
+
+## Boot 8 — Actuator — key endpoints, exposing, securing
+
+**Answer:**
+- **Actuator** adds **production-ready endpoints** to a Boot app, under `/actuator`, for checking its **health**, **metrics**, **config** and **logs** while it runs. I add `spring-boot-starter-actuator`, and Boot auto-configures the endpoints.
+
+- For safety, only **`/actuator/health`** is **exposed over HTTP** by default. I choose what else to expose with **`management.endpoints.web.exposure.include`**, and I expose only what I really need.
+
+- Endpoints like `env`, `heapdump` or `loggers` reveal **internals** or can **change** the app, so I **secure** them. Usually that means **Spring Security** with an admin role, or putting Actuator on a **separate management port** that only the internal network can reach.
+
+**Key points:**
+- **The endpoints worth knowing**:
+  - **`health`**: is the app OK, including the database, disk space and custom checks. Load balancers and Kubernetes use it.
+  - **`info`**: app name, version, build and git details.
+  - **`metrics`** / **`prometheus`**: JVM, HTTP and custom metrics for monitoring.
+  - **`loggers`**: view and **change log levels at runtime**.
+  - **`env`** / **`configprops`**: the resolved configuration, with secret values **masked**.
+  - **`beans`**, **`conditions`**, **`mappings`**: debugging which beans, auto-configs and URLs exist.
+  - **`threaddump`** / **`heapdump`**: diagnosing hangs and memory problems.
+
+- **Exposing endpoints**: an endpoint must be **available** and also **exposed** over a transport (HTTP or JMX). Exposure is a simple list in config.
+```yaml
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers
+  endpoint:
+    health:
+      show-details: when-authorized
+```
+
+- **Custom health indicator**: I implement **`HealthIndicator`** to add my own check, like "is the payment provider reachable". If it reports **DOWN**, the overall status becomes DOWN and `/actuator/health` returns **HTTP 503**.
+```java
+@Component
+public class PaymentGatewayHealthIndicator implements HealthIndicator {
+    public Health health() {
+        return Health.up().withDetail("provider", "FakePay").build();
+    }
+}
+```
+
+- **Securing with Spring Security**: **`EndpointRequest`** matches Actuator URLs. So I can leave `health` and `info` public and require a role for everything else.
+```java
+http.authorizeHttpRequests(auth -> auth
+        .requestMatchers(EndpointRequest.to("health", "info")).permitAll()
+        .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ACTUATOR")
+        .anyRequest().permitAll());
+```
+
+- **Separate management port**: **`management.server.port=9090`** serves Actuator on its own port. The firewall or Kubernetes then keeps that port **internal**, while the API port stays public.
+
+- **What changed**: since **Boot 3.0**, `env` and `configprops` **mask all values** by default (`show-values: never`). Since **Boot 3.4**, endpoint access is set with **`management.endpoint.<id>.access`** (`none`, `read-only`, `unrestricted`), replacing the old `enabled` flags.
+
+**Follow-ups:**
+
+### Q: Why is only health exposed by default?
+- Because the other endpoints can **leak sensitive data**, like config values, heap contents or bean structure, or can **change the app**, like log levels. Boot is **secure by default**, so I have to opt in to each one.
+
+---
+
+### Q: How do you write a custom Actuator endpoint?
+- I create a bean annotated with **`@Endpoint(id = "shopstats")`** and add methods with **`@ReadOperation`** (GET), **`@WriteOperation`** (POST) or **`@DeleteOperation`**. It then appears at `/actuator/shopstats` once it's exposed.
+
+---
+
+### Q: What does show-details do on the health endpoint?
+- It controls whether `/actuator/health` shows only **`{"status":"UP"}`** or also each **component's details**, like the database and disk space. **`when-authorized`** shows details only to **logged-in users with the right role**, which is the usual production setting.
+
+---
+
+### Q: How do you change a log level without restarting?
+- I **POST** to **`/actuator/loggers/<logger-name>`** with a body like `{"configuredLevel": "DEBUG"}`. The change applies **immediately**, but it's lost on restart.

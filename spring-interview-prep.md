@@ -44,7 +44,7 @@ You don't need to do them separately — answering the questions in order covers
 - [ ] Idempotency key on POST /orders
 - [ ] API versioning (Spring 7 built-in or header-based)
 - [ ] springdoc OpenAPI / Swagger UI
-- [ ] Actuator health, metrics, custom health indicator; liveness/readiness
+- [ ] Actuator health, metrics, custom health indicator
 - [ ] A HandlerInterceptor AND a Filter that both log a request ID → compare
 - [ ] Enable virtual threads, observe thread names in logs
 
@@ -145,21 +145,19 @@ You don't need to do them separately — answering the questions in order covers
 
 **Configuration**
 - [x] ⭐ **6.** Externalized config precedence (properties, YAML, env vars, CLI args) — short: precedence order only
-- [ ] **7.** spring.config.import and loading external config/secrets
+- [x] **7.** spring.config.import and loading external config/secrets
 
 **Production readiness**
 - [ ] ⭐ **8.** Actuator — key endpoints, exposing, securing
-- [ ] ⭐ **9.** Liveness and readiness probes for Kubernetes
-- [ ] ⭐ **10.** Observability with Micrometer — metrics, tracing, trace IDs in logs
-- [ ] **11.** Logging — runtime level changes, log groups, Logback
-- [ ] **12.** Graceful shutdown
-- [ ] **13.** CommandLineRunner vs ApplicationRunner
+- [ ] ⭐ **9.** Observability with Micrometer — metrics, tracing, trace IDs in logs
+- [ ] **10.** Logging — runtime level changes, log groups, Logback
+- [ ] **11.** Graceful shutdown
 
 **Modern Boot (3+/4)**
-- [ ] **14.** Virtual threads
-- [ ] **15.** Executable JAR internals, layered jars, Buildpacks
-- [ ] **16.** Docker Compose support in development
-- [ ] **17.** DevTools — what it does, why it's off in production
+- [ ] **12.** Virtual threads
+- [ ] **13.** Executable JAR internals, layered jars, Buildpacks
+- [ ] **14.** Docker Compose support in development
+- [ ] **15.** DevTools — what it does, why it's off in production
 
 ---
 

@@ -21,3 +21,23 @@ shoplite:
       enabled: false
   store:
     name: ShopLite (application.yaml)
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,loggers,env,shopstats
+  endpoint:
+    health:
+      show-details: when-authorized
+      roles: ACTUATOR
+  info:
+    env:
+      enabled: true
+    java:
+      enabled: true
+
+info:
+  app:
+    name: ShopLite
+    version: 0.0.1
