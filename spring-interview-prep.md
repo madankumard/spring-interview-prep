@@ -148,8 +148,8 @@ You don't need to do them separately — answering the questions in order covers
 - [x] **7.** spring.config.import and loading external config/secrets
 
 **Production readiness**
-- [ ] ⭐ **8.** Actuator — key endpoints, exposing, securing
-- [ ] ⭐ **9.** Observability with Micrometer — metrics, tracing, trace IDs in logs
+- [x] ⭐ **8.** Actuator — key endpoints, exposing, securing
+- [x] ⭐ **9.** Observability with Micrometer — metrics, tracing, trace IDs in logs
 - [ ] **10.** Logging — runtime level changes, log groups, Logback
 - [ ] **11.** Graceful shutdown
 

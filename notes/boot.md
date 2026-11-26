@@ -397,3 +397,75 @@ http.authorizeHttpRequests(auth -> auth
 
 ### Q: How do you change a log level without restarting?
 - I **POST** to **`/actuator/loggers/<logger-name>`** with a body like `{"configuredLevel": "DEBUG"}`. The change applies **immediately**, but it's lost on restart.
+
+## Boot 9 — Observability with Micrometer — metrics, tracing, trace IDs in logs
+
+**Answer:**
+- **Observability** means I can understand what a running app is doing from the outside, using three signals: **metrics** (numbers over time), **traces** (the path of one request) and **logs**. In Spring Boot, all three are built on **Micrometer**, which works like **SLF4J for monitoring**: I write against one API, and it sends data to whatever backend I use.
+
+- **Most of it needs no code.** Once Actuator and the OpenTelemetry starter are on the classpath, Boot **automatically** measures and traces HTTP requests, database calls, `RestClient` calls and messaging. The only code I usually write is a **business metric**, like an orders-placed counter in the service.
+
+- For **tracing**, I add the **OpenTelemetry** starter. Every request then gets a **trace ID**, each step gets a **span ID**, and Boot **puts both into every log line**, so I can find all the logs of one request across services and see the timing in a tool like **Zipkin, Jaeger or Grafana Tempo**.
+
+**Key points:**
+- **Metric types**: a **counter** only goes up (orders placed), a **timer** measures how long things take and how often (request duration), and a **gauge** shows a current value (items in the queue). **Tags** split a metric by dimension, like `status=200`.
+
+- **A business metric in practice**: I inject the `MeterRegistry` into the **service** and count the business event. That's typically the only observability code in the app.
+```java
+public OrderService(MeterRegistry registry) {
+    this.ordersPlaced = registry.counter("shoplite.orders.placed");
+}
+
+public void placeOrder(...) {
+    // business logic
+    ordersPlaced.increment();
+}
+```
+
+- **The Observation API**: an **`Observation`** creates **a timer metric and a trace span at the same time**, and it's what Spring uses internally for HTTP, JDBC and messaging. When I want my own method timed and traced, I just annotate it with **`@Observed`** (it needs the AOP starter) instead of calling the API by hand.
+```java
+@Observed(name = "shoplite.order.place")
+public void placeOrder(...) { ... }
+```
+
+- **Trace and span IDs**: the **trace ID** is the same for the **whole request**, even across services, because it travels in the **`traceparent` HTTP header**. Each step gets its own **span ID**. With tracing on, Boot's default log pattern adds **`[traceId-spanId]`** to every line automatically.
+
+- **Sampling**: by default only **10% of requests** are traced (`management.tracing.sampling.probability: 0.1`) to keep the overhead low. In development, I set it to **1.0** to trace everything.
+```yaml
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+```
+
+- **Getting data out, pull vs push**: with **Prometheus**, the monitoring system **pulls** from `/actuator/prometheus`. With **OTLP**, the app **pushes** metrics and traces to an **OpenTelemetry Collector**, which forwards them to tools like Grafana. The OTel starter turns on the metrics push by default, so locally, with no collector, I switch it off.
+```yaml
+management:
+  otlp:
+    metrics:
+      export:
+        enabled: false
+```
+
+- **Dependencies in Boot 4**: metrics come with **Actuator**. Tracing needs **`spring-boot-starter-opentelemetry`**, and Prometheus needs **`micrometer-registry-prometheus`**. **Spring Cloud Sleuth** is gone since Boot 3, replaced by **Micrometer Tracing**, so "use Sleuth" is the outdated answer.
+
+**Follow-ups:**
+
+### Q: What's the difference between metrics, traces and logs?
+- **Metrics** are **cheap aggregated numbers** that tell me **something is wrong**, like the error rate going up. **Traces** show **where** it's wrong, meaning which service or call in a request is slow.
+
+- **Logs** explain **why**, with the details. The **trace ID** links all three together.
+
+---
+
+### Q: Why should tags have low cardinality?
+- Each **unique tag value** creates a **separate time series**. A tag like `userId` or `orderId` creates millions of them and can **crash the monitoring system**.
+
+- That's why `lowCardinalityKeyValue` is used for metrics tags, while `highCardinalityKeyValue` goes **only on spans**.
+
+---
+
+### Q: How does the trace ID get passed between microservices?
+- Spring's instrumented clients, like **`RestClient`**, **`WebClient`** and Kafka, automatically add the **W3C `traceparent` header** to outgoing calls. The receiving service reads it and **continues the same trace**.
+
+- This only works if the client is built from **Boot's auto-configured builder**, like `RestClient.Builder`, not with `new`.

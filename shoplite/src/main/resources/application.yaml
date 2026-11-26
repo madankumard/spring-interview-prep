@@ -26,7 +26,7 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,loggers,env,shopstats
+        include: health,info,metrics,loggers,env,shopstats,prometheus
   endpoint:
     health:
       show-details: when-authorized
@@ -36,6 +36,13 @@ management:
       enabled: true
     java:
       enabled: true
+  tracing:
+    sampling:
+      probability: 1.0
+  otlp:
+    metrics:
+      export:
+        enabled: false
 
 info:
   app:
