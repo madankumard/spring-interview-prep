@@ -150,8 +150,8 @@ You don't need to do them separately — answering the questions in order covers
 **Production readiness**
 - [x] ⭐ **8.** Actuator — key endpoints, exposing, securing
 - [x] ⭐ **9.** Observability with Micrometer — metrics, tracing, trace IDs in logs
-- [ ] **10.** Logging — runtime level changes, log groups, Logback
-- [ ] **11.** Graceful shutdown
+- [x] **10.** Logging — runtime level changes, log groups, Logback
+- [x] **11.** Graceful shutdown
 
 **Modern Boot (3+/4)**
 - [ ] **12.** Virtual threads

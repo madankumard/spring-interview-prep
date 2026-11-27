@@ -469,3 +469,102 @@ management:
 - Spring's instrumented clients, like **`RestClient`**, **`WebClient`** and Kafka, automatically add the **W3C `traceparent` header** to outgoing calls. The receiving service reads it and **continues the same trace**.
 
 - This only works if the client is built from **Boot's auto-configured builder**, like `RestClient.Builder`, not with `new`.
+
+## Boot 10 — Logging — runtime level changes, log groups, Logback
+
+**Answer:**
+- Spring Boot logs through **SLF4J**, the logging API my code uses, and **Logback**, the default implementation underneath. Both come with every starter, so logging works out of the box with a sensible console format.
+
+- I control logging mostly with **properties**: **`logging.level.*`** sets levels per package, **`logging.group.*`** bundles packages under one name, and **`logging.file.name`** writes to a file. I only need a **`logback-spring.xml`** for advanced setups.
+
+- In production I can **change log levels at runtime** through the Actuator **`loggers`** endpoint without restarting. Since **Boot 3.4**, I can also switch to **structured JSON logs** with one property, which log tools like ELK, Loki or Datadog read directly.
+
+**Key points:**
+- **Log levels**: from most to least detailed, **TRACE, DEBUG, INFO, WARN, ERROR**. The default is **INFO**, so `log.debug(...)` lines are hidden until I lower the level for that package. Using `{}` placeholders means the message is only built when the level is on.
+```java
+private static final Logger log = LoggerFactory.getLogger(ProductService.class);
+log.debug("Fetching product {}", id);
+```
+
+- **Levels and groups in config**: a level applies to a package and **everything below it**. A **group** lets me switch several related packages together, and Boot has built-in groups **`web`** and **`sql`**.
+```yaml
+logging:
+  group:
+    shoplite-sales: com.shoplite.order, com.shoplite.product
+  level:
+    root: INFO
+    shoplite-sales: DEBUG
+    web: DEBUG
+```
+
+- **Runtime changes**: a POST to **`/actuator/loggers/<logger-or-group>`** changes the level **immediately**, which is great for debugging a live problem. It's **lost on restart**, and the endpoint must be secured.
+
+- **Log files**: `logging.file.name` writes to a file, and Logback **rolls** it over by size, by default at **10 MB**, keeping **7 days**. Both can be changed with `logging.logback.rollingpolicy.*`. In containers, I usually just log to the **console** and let the platform collect it.
+
+- **Structured logging (Boot 3.4+)**: **`logging.structured.format.console: ecs`** (or `logstash`, `gelf`) prints each line as **JSON**, including the trace ID. Log tools can then **filter by field** instead of parsing text.
+```yaml
+logging:
+  structured:
+    format:
+      console: ecs
+```
+
+- **`logback-spring.xml`**: when properties aren't enough, like custom appenders or different setups per profile, I add this file to `src/main/resources`. I use the **`-spring`** name rather than `logback.xml`, so Boot loads it **after** its own setup and I can use **`<springProfile>`** and **`<springProperty>`**.
+
+**Follow-ups:**
+
+### Q: Why use SLF4J instead of calling Logback directly?
+- SLF4J is just an **API**, so my code doesn't depend on the logging implementation. I could switch to **Log4j2** by changing dependencies, without touching any code.
+
+---
+
+### Q: Why is logback-spring.xml preferred over logback.xml?
+- `logback.xml` is loaded **by Logback itself**, too early, before Spring has read its configuration. `logback-spring.xml` is loaded **by Boot**, so it supports Spring features like **`<springProfile name="prod">`** and reading properties.
+
+---
+
+### Q: How do you debug one problem in production without flooding the logs?
+- I set **only the relevant package or group** to DEBUG through **`/actuator/loggers`**, reproduce the issue, then set it back. The **trace ID** in each line lets me filter the logs of one request.
+
+## Boot 11 — Graceful shutdown
+
+**Answer:**
+- **Graceful shutdown** means that when the app is told to stop, it **stops accepting new requests** but **lets the requests already running finish** before it shuts down. Without it, users in the middle of a request, like placing an order, get an **error or a broken connection**.
+
+- Since **Boot 3.4** it's **on by default** (`server.shutdown=graceful`). Before that it was off, and I had to enable it myself, so "you must turn it on" is now the outdated answer.
+
+- Boot waits up to **30 seconds** by default for active requests, configurable with **`spring.lifecycle.timeout-per-shutdown-phase`**. If requests are still running after that, Boot **stops anyway**. Only after the web server has stopped are the beans destroyed, which is when **`@PreDestroy`** methods run.
+
+**Key points:**
+- **The shutdown order**:
+  1. The app gets a stop signal, like **SIGTERM** from Kubernetes or Docker, or Ctrl+C.
+  2. The web server **stops taking new requests**.
+  3. It **waits** for the active ones to finish.
+  4. Spring **closes the context** and destroys the beans.
+
+- **Configuration**: the timeout should be **shorter than the platform's kill timeout**, which is 30 seconds by default in Kubernetes. Otherwise the platform force-kills the app before Boot has finished.
+```yaml
+server:
+  shutdown: graceful        # default since Boot 3.4; "immediate" turns it off
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 20s
+```
+
+- **Cleanup in beans**: `@PreDestroy` methods run **after** the requests have finished. That's the right place to close resources the app opened itself, like a client connection or a scheduler.
+```java
+@PreDestroy
+void close() { log.info("Closing payment client"); }
+```
+
+- **Kubernetes**: on shutdown, Kubernetes sends **SIGTERM** and removes the pod from the Service **at the same time**. So a short **`preStop` sleep** is often added, giving the load balancer time to stop routing traffic before the app stops accepting it.
+
+**Follow-ups:**
+
+### Q: What happens to a request that's still running when the timeout runs out?
+- Boot logs that the graceful shutdown was **aborted** and **closes the connection**, so that request fails. That's why the timeout must suit the **slowest normal request**, and long jobs belong in a queue, not in an HTTP request.
+
+---
+
+### Q: Does graceful shutdown work when the process is killed with kill -9?
+- **No.** SIGKILL (`kill -9`) ends the JVM **instantly**, so no shutdown hooks run and nothing is graceful. It only works with signals the JVM can catch, like **SIGTERM** or **Ctrl+C**.

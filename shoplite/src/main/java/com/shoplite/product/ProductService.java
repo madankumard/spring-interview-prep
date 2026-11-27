@@ -23,6 +23,7 @@ public class ProductService {
     }
 
     public Product getProduct(Long id) {
+        log.debug("Fetching product {}", id);
         return productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product " + id + " not found"));
     }

@@ -48,3 +48,9 @@ info:
   app:
     name: ShopLite
     version: 0.0.1
+
+logging:
+  group:
+    shoplite-sales: com.shoplite.order, com.shoplite.product
+  level:
+    shoplite-sales: INFO
