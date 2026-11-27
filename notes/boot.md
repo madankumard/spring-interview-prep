@@ -568,3 +568,89 @@ void close() { log.info("Closing payment client"); }
 
 ### Q: Does graceful shutdown work when the process is killed with kill -9?
 - **No.** SIGKILL (`kill -9`) ends the JVM **instantly**, so no shutdown hooks run and nothing is graceful. It only works with signals the JVM can catch, like **SIGTERM** or **Ctrl+C**.
+
+## Boot 12 — Virtual threads
+
+**Answer:**
+- **Virtual threads** are a **Java 21** feature: very lightweight threads managed by the JVM instead of the operating system. I can have **millions** of them, and when one **blocks** on I/O, like a database call or an HTTP call, the JVM parks it and frees the real OS thread for other work.
+
+- In Spring Boot (**3.2+**) I turn them on with **one property**: `spring.threads.virtual.enabled=true`. Tomcat or Jetty then runs **every request on its own virtual thread**, and `@Async`, `@Scheduled` and message listeners use them too, with **no code changes**.
+
+- They help **I/O-bound** apps that spend most of their time **waiting**, which describes most REST and database services. They **don't make CPU-heavy work faster**, because they still share the same CPU cores.
+
+**Key points:**
+- **Enabling them**: it's one line in config. Afterwards, request threads show up in logs with names like `tomcat-handler-0` instead of `http-nio-8080-exec-1`.
+```yaml
+spring:
+  threads:
+    virtual:
+      enabled: true
+```
+
+- **Why it matters**: with normal threads, Tomcat has a pool of **200 threads**, so 200 slow requests **block everyone else**. With virtual threads there's no such limit, so simple **blocking code scales** like reactive code, without WebFlux's complexity.
+
+- **The new bottleneck is downstream**: the **database connection pool**, which HikariCP sizes at 10 by default, now limits how many requests really run at once. More threads don't help if they all **wait for a connection**.
+
+- **Gotchas**:
+  - **Pinning**: a virtual thread inside a **`synchronized`** block used to hold its OS thread. **JDK 24** fixed that, but native calls still pin.
+  - **`ThreadLocal`** caches become wasteful when there are millions of short-lived threads.
+  - Virtual threads are **daemon threads**, so an app with no web server, only `@Scheduled` jobs, may **exit right away**. **`spring.main.keep-alive=true`** fixes that.
+
+**Follow-ups:**
+
+### Q: Do virtual threads replace WebFlux?
+- **For most apps, yes.** Blocking code on virtual threads now gives similar scalability with **simpler code, normal stack traces and easy debugging**.
+
+- WebFlux still fits **streaming** and **backpressure** use cases, like server-sent events or many long-lived connections.
+
+---
+
+### Q: Should I use virtual threads for a CPU-heavy task?
+- **No.** Virtual threads only help when threads **wait**. For CPU-bound work, like image processing or big calculations, a normal **fixed thread pool** sized to the number of cores is still the right tool.
+
+## Boot 13 — Executable JAR internals, layered jars, Buildpacks
+
+**Answer:**
+- A Spring Boot **executable JAR** (a "**fat jar**") contains **my classes and all my dependency jars** in one file, so I run the app with just `java -jar app.jar`. Plain Java **can't load jars nested inside a jar**, so Boot adds its own small **launcher** that sets up a class loader for them and then calls my `main()`.
+
+- The jar is also **layered**: it records which files are **dependencies** (rarely change) and which are **my code** (changes every build). When I build a Docker image, I put each group in its **own image layer**, so a code change only rebuilds and pushes a **few KB** instead of the whole 50+ MB.
+
+- **Buildpacks** build a production-ready Docker image **without a Dockerfile**. I run `mvn spring-boot:build-image`, and it picks a JDK, uses the layers, and applies **memory and security best practices** automatically.
+
+**Key points:**
+- **Inside the jar**:
+  - **`META-INF/MANIFEST.MF`**: `Main-Class` is Boot's **`JarLauncher`**, and `Start-Class` is **my** application class.
+  - **`BOOT-INF/classes/`**: my compiled code and `application.yaml`.
+  - **`BOOT-INF/lib/`**: every dependency jar, untouched.
+  - **`BOOT-INF/layers.idx`**: the list of which files go in which layer.
+```text
+Main-Class: org.springframework.boot.loader.launch.JarLauncher
+Start-Class: com.shoplite.ShopliteApplication
+```
+
+- **Why `java -cp app.jar com.shoplite.ShopliteApplication` fails**: my classes sit under `BOOT-INF/classes`, not at the jar root, and the libraries are nested jars. Only the **launcher** knows how to find them.
+
+- **The four layers**, from least to most often changed: **`dependencies`**, **`spring-boot-loader`**, **`snapshot-dependencies`** and **`application`**. Docker **caches** the unchanged lower layers.
+
+- **Layered Dockerfile**: a first stage **extracts** the layers with Boot's **`jarmode=tools`**, and a second stage copies them in **separate `COPY` steps**, so each becomes its own cached layer.
+```dockerfile
+RUN java -Djarmode=tools -jar application.jar extract --layers --destination extracted
+COPY --from=builder /builder/extracted/dependencies/ ./
+COPY --from=builder /builder/extracted/application/ ./
+```
+
+- **Buildpacks vs Dockerfile**: Buildpacks need **no Dockerfile to maintain** and give a secure, well-tuned image, which suits most teams. I write a Dockerfile when I need **full control**, like a special base image or extra OS tools.
+
+- **What changed**: in **Boot 3.2** the launcher moved to the **`org.springframework.boot.loader.launch`** package. **Boot 3.3** replaced the old `jarmode=layertools` with **`jarmode=tools`**, so `layertools` is the outdated answer.
+
+**Follow-ups:**
+
+### Q: Why not just copy the fat jar into the image with one COPY?
+- Then the **whole jar is one layer**, so every tiny code change creates a **new 50+ MB layer**. Builds, pushes and pulls get slower and the registry fills up.
+
+- With layers, only the small **`application`** layer changes on most builds.
+
+---
+
+### Q: Fat jar vs WAR — when would you still build a WAR?
+- Only when the company must deploy to an **existing external server**, like a shared Tomcat or WebLogic. For containers and the cloud, the **executable jar** is the standard.

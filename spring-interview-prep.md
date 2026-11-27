@@ -154,8 +154,8 @@ You don't need to do them separately — answering the questions in order covers
 - [x] **11.** Graceful shutdown
 
 **Modern Boot (3+/4)**
-- [ ] **12.** Virtual threads
-- [ ] **13.** Executable JAR internals, layered jars, Buildpacks
+- [x] **12.** Virtual threads
+- [x] **13.** Executable JAR internals, layered jars, Buildpacks
 - [ ] **14.** Docker Compose support in development
 - [ ] **15.** DevTools — what it does, why it's off in production
 
