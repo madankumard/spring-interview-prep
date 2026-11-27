@@ -654,3 +654,47 @@ COPY --from=builder /builder/extracted/application/ ./
 
 ### Q: Fat jar vs WAR — when would you still build a WAR?
 - Only when the company must deploy to an **existing external server**, like a shared Tomcat or WebLogic. For containers and the cloud, the **executable jar** is the standard.
+
+## Boot 14 — DevTools — what it does, why it's off in production
+
+**Answer:**
+- **`spring-boot-devtools`** is a **development-only** dependency that speeds up the code → run → check loop. Its main feature is **automatic restart**: when my compiled classes or resources change, the app **restarts itself in about a second**, instead of me stopping and starting it by hand.
+
+- It also sets **dev-friendly property defaults**. For example, it **turns off template caching** so HTML changes show up immediately, and it **turns on extra web logging**.
+
+- It's **off in production automatically**. The Maven plugin **leaves it out of the fat jar**, and DevTools **disables itself** when the app is started with `java -jar`. It must stay out because restarts, relaxed caching and its remote features are **slow and unsafe** for a live system.
+
+**Key points:**
+- **Setup**: add it with **`runtime` scope** and **`optional`**. `runtime` means my code can't call it, and `optional` means it's **not passed on** to other projects that use mine.
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <scope>runtime</scope>
+    <optional>true</optional>
+</dependency>
+```
+
+- **Why restart is fast: two classloaders**. A **classloader** is the part of the JVM that loads classes. DevTools loads the **libraries that never change** into a **base classloader**, and **my own classes** into a **restart classloader**. On a change it **throws away only the restart classloader** and builds a new one, so the big libraries aren't loaded again.
+
+- **What triggers a restart**: any change on the **classpath**, meaning `target/classes`. So the trigger is a **build**, not a save. In IntelliJ that's **Build Project (Ctrl+F9)**, or turning on **"Build project automatically"**. Changes to **`static/` and `templates/`** don't restart, because they only need a reload.
+
+- **How to spot it in logs**: the app runs on a thread called **`restartedMain`** instead of `main`. On each restart, beans are recreated and **`CommandLineRunner`s run again**.
+
+- **Restart vs hot swap**: DevTools **restarts the Spring context**, so in-memory state is lost, but it's free and simple. Tools like **JRebel** reload changed classes **without a restart**, but they are commercial.
+
+- **What changed**: **LiveReload**, the browser-refresh feature, is **deprecated in Boot 4.1 with no replacement**. The core feature that matters today is still **automatic restart**.
+
+**Follow-ups:**
+
+### Q: How does Boot make sure DevTools never runs in production?
+- **Two safety nets**. First, the **Spring Boot Maven/Gradle plugin excludes DevTools from the fat jar** by default, so it's not even there.
+
+- Second, if it were on the classpath, DevTools **disables itself** when the app is started from a **packaged jar with `java -jar`**, which it treats as production. I can force it off with **`-Dspring.devtools.restart.enabled=false`**.
+
+---
+
+### Q: Restart is still slow or keeps restarting — what do you check?
+- Make sure only **my code** is in the restart classloader. If a **library jar changes**, as with a snapshot module in a multi-module project, Boot does a **full restart**. I can tune what's included with a **`META-INF/spring-devtools.properties`** file.
+
+- If it **restarts too often**, for example on every auto-save, I can set **`spring.devtools.restart.trigger-file`**. Then it only restarts when that **one file is touched**.

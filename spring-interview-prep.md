@@ -156,8 +156,7 @@ You don't need to do them separately — answering the questions in order covers
 **Modern Boot (3+/4)**
 - [x] **12.** Virtual threads
 - [x] **13.** Executable JAR internals, layered jars, Buildpacks
-- [ ] **14.** Docker Compose support in development
-- [ ] **15.** DevTools — what it does, why it's off in production
+- [x] **14.** DevTools — what it does, why it's off in production
 
 ---
 
