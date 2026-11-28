@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Repository
 public class ProductRepository {
@@ -16,6 +17,8 @@ public class ProductRepository {
             2L, new Product(2L, "Mouse", new BigDecimal("19.99"))
     ));
 
+    private final AtomicLong nextId = new AtomicLong(3);
+
     public List<Product> findAll() {
         return List.copyOf(store.values());
     }
@@ -23,4 +26,16 @@ public class ProductRepository {
     public Optional<Product> findById(Long id) {
         return Optional.ofNullable(store.get(id));
     }
+
+    public Product save(Product product) {
+        Long id = product.id() !=null? product.id() : nextId.getAndIncrement();
+        Product saved = new Product(id, product.name(),  product.price());
+        store.put(id, saved);
+        return saved;
+    }
+
+    public boolean deleteById(Long id) {
+        return store.remove(id) != null;
+    }
+
 }

@@ -23,8 +23,20 @@ public class ProductService {
     }
 
     public Product getProduct(Long id) {
-        log.debug("Fetching product {}", id);
+        log.info("Fetching product {}", id);
         return productRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Product " + id + " not found"));
+    }
+
+    public Product createProduct(CreateProductRequest request) {
+        Product saved = productRepository.save(new Product(null, request.name(), request.price()));
+        log.info("Created product {}", saved.id());
+        return saved;
+    }
+
+    public boolean deleteProduct(Long id) {
+        boolean deleted = productRepository.deleteById(id);
+        log.info("Delete product {} -> {}", id, deleted ? "deleted" : "not found");
+        return deleted;
     }
 }

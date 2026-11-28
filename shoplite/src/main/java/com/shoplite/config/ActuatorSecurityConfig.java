@@ -20,7 +20,10 @@ public class ActuatorSecurityConfig {
                         .requestMatchers(EndpointRequest.toAnyEndpoint()).hasRole("ACTUATOR")
                         .anyRequest().permitAll())
                 .httpBasic(Customizer.withDefaults())
-                .csrf(csrf -> csrf.ignoringRequestMatchers(EndpointRequest.toAnyEndpoint()));
+                .csrf(csrf ->
+                        csrf.ignoringRequestMatchers(EndpointRequest.toAnyEndpoint())
+                                .ignoringRequestMatchers("/api/**")
+                );
         return http.build();
     }
 

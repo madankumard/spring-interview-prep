@@ -163,49 +163,32 @@ You don't need to do them separately — answering the questions in order covers
 ### 3. Spring REST, incl. Spring MVC (ID: REST)
 
 **REST fundamentals**
-- [ ] **1.** What is REST? Constraints and resources
-- [ ] ⭐ **2.** Safe vs idempotent methods; why idempotency matters
+- [x] **1.** What is REST? Constraints, resources, URL design
+- [x] ⭐ **2.** Safe vs idempotent methods; why idempotency matters
 - [ ] ⭐ **3.** PUT vs PATCH vs POST
 - [ ] **4.** Making POST idempotent (idempotency keys)
 - [ ] ⭐ **5.** Key status codes (200, 201+Location, 204, 400, 401 vs 403, 404, 409, 422, 500)
-- [ ] **6.** URL design best practices
 
 **Spring MVC core**
-- [ ] **7.** @RestController vs @Controller + @ResponseBody
-- [ ] **8.** @RequestMapping and shortcuts; consumes/produces
-- [ ] ⭐ **9.** @PathVariable vs @RequestParam vs @RequestBody vs @RequestHeader
-- [ ] **10.** ResponseEntity vs @ResponseStatus
-- [ ] ⭐ **11.** HttpMessageConverter and content negotiation
-- [ ] **12.** Request flow through DispatcherServlet (HandlerMapping → HandlerAdapter → converter)
-- [ ] **13.** Why DTOs instead of exposing entities
-- [ ] **14.** Filter vs HandlerInterceptor vs AOP
-- [ ] **15.** Spring MVC vs WebFlux — and how virtual threads change the choice
+- [ ] **6.** @RestController vs @Controller + @ResponseBody
+- [ ] ⭐ **7.** @PathVariable vs @RequestParam vs @RequestBody vs @RequestHeader; @RequestMapping shortcuts, consumes/produces
+- [ ] **8.** ResponseEntity vs @ResponseStatus
+- [ ] ⭐ **9.** HttpMessageConverter and content negotiation
+- [ ] **10.** Request flow through DispatcherServlet (HandlerMapping → HandlerAdapter → converter)
+- [ ] **11.** Why DTOs instead of exposing entities
+- [ ] **12.** Filter vs HandlerInterceptor vs AOP
+- [ ] **13.** Spring MVC vs WebFlux — and how virtual threads change the choice
 
 **Errors & validation**
-- [ ] ⭐ **16.** @RestControllerAdvice + @ExceptionHandler
-- [ ] **17.** ProblemDetail (RFC 9457)
-- [ ] ⭐ **18.** @Valid / @Validated, custom validators, MethodArgumentNotValidException
+- [ ] ⭐ **14.** @RestControllerAdvice + @ExceptionHandler returning ProblemDetail (RFC 9457)
+- [ ] ⭐ **15.** @Valid / @Validated, custom validators, MethodArgumentNotValidException
 
 **API design**
-- [ ] **19.** API versioning strategies; Spring Framework 7 built-in versioning
-- [ ] **20.** Pagination and sorting (Pageable)
-- [ ] **21.** Caching with ETag / Cache-Control
-- [ ] **22.** OpenAPI / Swagger (springdoc)
-- [ ] **23.** File upload/download (multipart)
-
-**Security**
-- [ ] ⭐ **24.** Securing REST APIs — stateless JWT via OAuth2 Resource Server
-- [ ] **25.** CORS
-- [ ] **26.** Rate limiting and API gateway basics
+- [ ] **16.** API versioning strategies; Spring Framework 7 built-in versioning
+- [ ] **17.** Pagination and sorting in the API (Pageable, page/size/sort params)
 
 **HTTP clients**
-- [ ] ⭐ **27.** RestTemplate vs WebClient vs RestClient — which to use today
-- [ ] **28.** HTTP interface clients (@HttpExchange)
-- [ ] **29.** Timeouts, retries, circuit breakers for outbound calls
-
-**Testing**
-- [ ] **30.** @WebMvcTest with MockMvc / MockMvcTester
-- [ ] **31.** Testing clients with MockRestServiceServer / WireMock
+- [ ] ⭐ **18.** RestTemplate vs WebClient vs RestClient — which to use today; HTTP interface clients (@HttpExchange)
 
 ---
 

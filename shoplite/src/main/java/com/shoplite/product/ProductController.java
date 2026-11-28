@@ -1,10 +1,10 @@
 package com.shoplite.product;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -25,5 +25,22 @@ public class ProductController {
     @GetMapping("/{id}")
     public Product get(@PathVariable Long id) {
         return productService.getProduct(id);
+    }
+
+    @PostMapping
+    public ResponseEntity<Product> create(@RequestBody CreateProductRequest request) {
+        Product created = productService.createProduct(request);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(created.id())
+                .toUri();
+        return ResponseEntity.created(location).build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void>  delete(@PathVariable Long id) {
+        return productService.deleteProduct(id)
+                ? ResponseEntity.noContent().build()
+                : ResponseEntity.notFound().build();
     }
 }
