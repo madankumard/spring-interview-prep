@@ -31,6 +31,7 @@ public class ActuatorSecurityConfig {
     UserDetailsService users() {
         // demo only — {noop} = plain-text password
         return new InMemoryUserDetailsManager(
-                User.withUsername("ops").password("{noop}ops-pass").roles("ACTUATOR").build());
+                User.withUsername("ops").password("{noop}ops-pass").roles("ACTUATOR").build(),
+                User.withUsername("clerk").password("{noop}clerk-pass").roles("USER").build());
     }
 }

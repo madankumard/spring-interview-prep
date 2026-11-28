@@ -81,3 +81,156 @@ POST /api/products    {"name":"Monitor","price":199.99}   → id 3, then id 4 on
 - Because everyone in the chain treats GET as safe. **Browsers prefetch** links, **crawlers** follow them, and **caches and retries** may repeat them.
 
 - An endpoint like `GET /orders/42/cancel` could therefore cancel orders **without any user action**. State changes belong in **POST, PUT, PATCH or DELETE**.
+
+## REST 3 — PUT vs PATCH vs POST
+
+**Answer:**
+- **POST** creates a **new** resource. Each call creates another one, so it's **not idempotent**.
+
+- **PUT** **replaces the whole** resource. Fields you don't send are lost, and repeating it gives the same result, so it's **idempotent**.
+
+- **PATCH** **updates only the fields you send**. Everything else stays the same.
+
+**Key points:**
+- **Comparison**:
+
+| | POST | PUT | PATCH |
+|---|---|---|---|
+| Purpose | Create | Replace whole resource | Update some fields |
+| Target URI | Collection `/products` | Resource `/products/1` | Resource `/products/1` |
+| Body | New resource, no id | **Complete** resource | **Only changed** fields |
+| Idempotent | No | Yes | Not guaranteed |
+| Typical response | 201 + Location | 200 (or 204) | 200 (or 204) |
+
+- **PUT vs PATCH with the same body**: PUT wipes the fields you didn't send, while PATCH keeps them.
+```http
+PUT   /api/products/1  {"price":39.99}   → {"id":1,"name":null,"price":39.99}
+PATCH /api/products/1  {"price":39.99}   → {"id":1,"name":"Keyboard","price":39.99}
+```
+
+- **Easy way to remember**: **POST** is "New File", **PUT** is overwriting the file, and **PATCH** is editing one line.
+
+**Follow-ups:**
+
+### Q: Can POST be used for updates?
+- Technically yes, and it's used for **actions** that don't fit CRUD, such as `POST /api/orders/42/cancel`, which **triggers a process** rather than editing fields.
+
+- For plain field updates, PUT or PATCH is preferred, because their **semantics are clear** and PUT is **safe to retry**.
+
+## REST 4 — Making POST idempotent (idempotency keys)
+
+**Answer:**
+- POST isn't idempotent, so if a client **retries** after a timeout, it can create a **duplicate order** or charge a card twice.
+
+- The fix is an **idempotency key**: the client generates a unique ID (usually a **UUID**) and sends it in an **`Idempotency-Key`** header.
+
+- The server **stores the key with the result**. If the same key arrives again, it **returns the stored result** instead of processing the request a second time.
+
+**Key points:**
+- **Flow**:
+  1. The client creates a UUID **once per user action**, such as one click on "Place order".
+  2. The server checks whether it has **seen the key before**.
+  3. For a **new key**, it processes the request and saves the key with the response.
+  4. For a **known key**, it returns the **saved response**, so no new order is created.
+```http
+POST /api/orders
+Idempotency-Key: 7f3c9a2e-1b4d-4e8f-9a6b-2c5d8e1f0a3b
+{"customerEmail":"alice@shoplite.com","product":"keyboard"}
+```
+
+- **The client reuses the same key for retries**, and a **new action gets a new key**. If the client generated a new key on every retry, the protection would be gone.
+
+- **Where to store keys**: in production, a **database table with a unique constraint** on the key, or **Redis**, with an **expiry** (for example 24 hours). An in-memory map works only for a single instance and is lost on restart.
+
+- **Concurrent duplicates**: two identical requests can arrive **at the same moment**. The check-and-save must be **atomic**, such as a DB unique constraint or Redis `SET NX`, so only one of them is processed.
+
+- **Same key with a different body**: this is a client bug. The server should reject it, typically with **422 Unprocessable Content**, instead of returning the old result.
+
+**Follow-ups:**
+
+### Q: Why not just detect duplicates by comparing the order details?
+- Two orders with the **same details can be legitimate**, for example a customer buying the same keyboard twice on purpose. Only the client knows whether a request is a **retry or a new action**, and the idempotency key is how it tells the server.
+
+---
+
+### Q: Where have you seen this in real systems?
+- **Payment APIs** like **Stripe** and PayPal require an idempotency key on charge requests, which is why a retry never charges twice.
+
+- The same idea appears in messaging as **idempotent consumers**, which record processed message IDs so a redelivered message isn't applied twice.
+
+## REST 5 — Key status codes
+
+**Answer:**
+- Status codes tell the client **what happened** without it having to read the body. **2xx** means success, **4xx** means the **client** made a mistake, and **5xx** means the **server** failed.
+
+- The ones I use most are **200** OK, **201** Created, **204** No Content, **400** Bad Request, **401** Unauthorized, **403** Forbidden, **404** Not Found, **409** Conflict, and **500** Internal Server Error.
+
+- The classic interview pair is **401 vs 403**. 401 means **"I don't know who you are"**, and 403 means **"I know who you are, but you're not allowed."**
+
+**Key points:**
+- **Quick reference**:
+
+| Code | Meaning | Typical use |
+|---|---|---|
+| **200** OK | Success with a body | GET, PUT, PATCH |
+| **201** Created | New resource created | POST, with a **`Location`** header |
+| **204** No Content | Success, no body | DELETE |
+| **400** Bad Request | Request is malformed | Invalid JSON, wrong type (`/products/abc`) |
+| **401** Unauthorized | **Not authenticated** | Missing or invalid credentials |
+| **403** Forbidden | **Authenticated, but not allowed** | Wrong role |
+| **404** Not Found | Resource doesn't exist | `GET /products/99` |
+| **409** Conflict | Clashes with current state | Duplicate email, version conflict |
+| **422** Unprocessable Content | Valid JSON, but breaks business rules | Quantity is negative |
+| **500** Internal Server Error | Unexpected server bug | Unhandled exception |
+
+- **401 vs 403**: **401** is about **authentication** (who are you?), so the fix is to log in or send a valid token. **403** is about **authorization** (what may you do?), so logging in again won't help.
+
+- **400 vs 422**: **400** means the server **couldn't read** the request, such as broken JSON or a wrong type. **422** means it **could read it**, but the data **fails validation or business rules**. Spring returns **400** for validation errors by default, and many teams keep it that way.
+
+- **A missing resource must be 404, not 500**: a 500 tells the client "the server is broken" and triggers alerts, when really the client asked for something that **doesn't exist**.
+
+**Follow-ups:**
+
+### Q: Why not always return 200 with an error message in the body?
+- Clients, **gateways, monitoring and retry logic** all rely on the status code. A "200 with an error" looks successful to all of them, so failures go **unnoticed** and caches may even **store the error**.
+
+---
+
+### Q: When would you return 404 instead of 403?
+- When even **revealing that the resource exists** is a security risk. For example, if a user asks for another customer's order, returning **404** hides that the order exists at all. GitHub does this for private repositories.
+
+## REST 6 — @RestController vs @Controller + @ResponseBody
+
+**Answer:**
+- **`@RestController`** is simply **`@Controller` + `@ResponseBody`** combined into one annotation.
+
+- With plain **`@Controller`**, a returned String is treated as a **view name**, such as a Thymeleaf template, and Spring renders an **HTML page**.
+
+- With **`@ResponseBody`** (or `@RestController`), the return value is **written directly into the response body**, as JSON for objects or plain text for Strings. That's what REST APIs need.
+
+**Key points:**
+- **Same method, different result**:
+```java
+@Controller
+class PageController {
+    @GetMapping("/hello")
+    String hello() { return "hello"; }      // renders the template hello.html
+}
+
+@RestController
+class ApiController {
+    @GetMapping("/hello")
+    String hello() { return "hello"; }      // response body is the text: hello
+}
+```
+
+- **Who converts the return value**: with `@ResponseBody`, Spring uses an **`HttpMessageConverter`**. **Jackson** turns objects into **JSON**, and Strings are written as **plain text**.
+
+- **When to use which**: **`@RestController`** for **REST APIs** (JSON), and **`@Controller`** for **server-rendered web pages** (Thymeleaf, JSP). In modern apps with a React or Angular frontend, almost all controllers are `@RestController`.
+
+- **Mixing in one class**: a `@Controller` can still return data from a single method by putting **`@ResponseBody` on that method only**.
+
+**Follow-ups:**
+
+### Q: What happens if you forget @ResponseBody on a @Controller method that returns a String?
+- Spring treats the String as a **view name** and tries to find a template with that name. If there's no template engine, it fails with a **"Circular view path"** error and a **500**, because it tries to forward back to the same URL.

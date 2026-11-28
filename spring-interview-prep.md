@@ -165,12 +165,12 @@ You don't need to do them separately — answering the questions in order covers
 **REST fundamentals**
 - [x] **1.** What is REST? Constraints, resources, URL design
 - [x] ⭐ **2.** Safe vs idempotent methods; why idempotency matters
-- [ ] ⭐ **3.** PUT vs PATCH vs POST
-- [ ] **4.** Making POST idempotent (idempotency keys)
-- [ ] ⭐ **5.** Key status codes (200, 201+Location, 204, 400, 401 vs 403, 404, 409, 422, 500)
+- [x] ⭐ **3.** PUT vs PATCH vs POST
+- [x] **4.** Making POST idempotent (idempotency keys)
+- [x] ⭐ **5.** Key status codes (200, 201+Location, 204, 400, 401 vs 403, 404, 409, 422, 500)
 
 **Spring MVC core**
-- [ ] **6.** @RestController vs @Controller + @ResponseBody
+- [x] **6.** @RestController vs @Controller + @ResponseBody
 - [ ] ⭐ **7.** @PathVariable vs @RequestParam vs @RequestBody vs @RequestHeader; @RequestMapping shortcuts, consumes/produces
 - [ ] **8.** ResponseEntity vs @ResponseStatus
 - [ ] ⭐ **9.** HttpMessageConverter and content negotiation

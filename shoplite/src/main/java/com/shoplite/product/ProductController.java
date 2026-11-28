@@ -23,8 +23,10 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Product get(@PathVariable Long id) {
-        return productService.getProduct(id);
+    public ResponseEntity<Product> get(@PathVariable Long id) {
+        return productService.getProduct(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -35,6 +37,20 @@ public class ProductController {
                 .buildAndExpand(created.id())
                 .toUri();
         return ResponseEntity.created(location).build();
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Product> replace(@PathVariable Long id, @RequestBody UpdateProductRequest request) {
+        return productService.replaceProduct(id,request)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Product> patch(@PathVariable Long id, @RequestBody PatchProductRequest request) {
+        return productService.patchProduct(id, request)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
